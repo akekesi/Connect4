@@ -123,9 +123,11 @@ Run **Connect4** by double-clicking the `connect4.exe` file located in the `/exe
 - [x] ~~Task finished~~
 
 ### To-Do
+- [ ] Using [GitHub Issues](https://github.com/akekesi/Connect4/issues) insted of this To-Do list 😎
+- [ ] Add logging
 - [ ] Add version
 - [ ] Add setup.py, .toml
-- [x] Add badges (GitHub Actions CI)
+- [x] ~~Add badges (GitHub Actions CI)~~
 - [ ] Add badges (GitHub Actions Coverage)
 - [ ] Add badges (Version)
 - [ ] Add badges (...)
