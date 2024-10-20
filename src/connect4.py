@@ -15,7 +15,19 @@ Example usage:
     connect4.move(2, 4)  # Player 2 places a disc in column 4
 """
 
+import os
+import logging
 import numpy as np
+
+from src.logger_config import Logging
+
+
+# set logger up
+logger = Logging().set_logger(
+    name="Connect4",
+    level=logging.DEBUG,
+    path_dir=os.path.join(os.path.dirname(__file__), "..", "logs")
+)
 
 
 class Connect4:
@@ -28,10 +40,13 @@ class Connect4:
         Disc of player-1: (int) 1
         Disc of player-2: (int) 2
         """
+        logger.debug("0")
         self.row = 6
         self.col = 7
         self.discs = [1, 2]
         self.board = np.zeros((self.row, self.col))
+        logger.info("board is initialized")
+        logger.debug("1")
 
     def set_disc(self, disc: int, row: int, col: int) -> None:
         """
@@ -42,7 +57,10 @@ class Connect4:
             row (int): The row to place the disc in.
             col (int): The column to place the disc in.
         """
+        logger.debug("0")
         self.board[row, col] = disc
+        logger.info("disc is set")
+        logger.debug("1")
 
     def get_row(self, col: int) -> int:
         """
@@ -57,10 +75,15 @@ class Connect4:
             is empty, returns the last row. If not, returns the row 
             just above the first occupied row.
         """
-        row = np.nonzero(self.board[:, col])[0]
-        if np.size(row) == 0:
-            return self.row - 1
-        return int(row[0]) - 1
+        logger.debug("0")
+        nonzero_list = np.nonzero(self.board[:, col])[0]
+        if np.size(nonzero_list) == 0:
+            row = self.row - 1
+        else:
+            row = int(nonzero_list[0]) - 1
+        logger.info("%d", row)
+        logger.debug("1")
+        return row
 
     def check_valid_col(self, col: int) -> bool:
         """
@@ -72,7 +95,11 @@ class Connect4:
         Returns:
             bool: True if the column index is valid, False otherwise.
         """
-        return 0 <= col < self.col
+        logger.debug("0")
+        valid = (0 <= col < self.col)
+        logger.info("%s", valid)
+        logger.debug("1")
+        return valid
 
     def check_valid_row(self, row: int) -> bool:
         """
@@ -84,7 +111,11 @@ class Connect4:
         Returns:
             bool: True if the row index is valid, False otherwise.
         """
-        return 0 <= row < self.row
+        logger.debug("0")
+        valid = (0 <= row < self.row)
+        logger.info("%s", valid)
+        logger.debug("1")
+        return valid
 
     def move(self, disc: int, col: int) -> bool:
         """
@@ -98,16 +129,21 @@ class Connect4:
         Returns:
             bool: True if the move is valid and successful, False otherwise.
         """
+        logger.debug("0")
         if not self.check_valid_col(col=col):
-            print(f"invalid {col = }")
+            logger.info("invalid col = %d", col)
+            logger.debug("1")
             return False
 
         row = self.get_row(col=col)
         if not self.check_valid_row(row=row):
-            print(f"invalid {row = }")
+            logger.info("invalid row = %d", row)
+            logger.debug("2")
             return False
 
         self.set_disc(disc=disc, row=row, col=col)
+        logger.info("move is done")
+        logger.debug("3")
         return True
 
 
