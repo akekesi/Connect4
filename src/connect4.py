@@ -20,6 +20,7 @@ import logging
 import numpy as np
 
 from src.logger_config import Logging
+from src.check_finish import check_finish
 
 
 # set logger up
@@ -146,6 +147,26 @@ class Connect4:
         logger.debug("3")
         return True
 
+    def game(self) -> None:
+        # TODO: init board ???
+        logger.debug("0")
+        while True:
+            disc = int(input("Enter your disc value: "))
+            col = int(input("Enter column number: "))
+            # TODO: check input
+            move_info = self.move(disc=disc, col=col)
+            if not move_info:
+                logger.info("Invalid move.")
+                continue
+            print(connect4.board)
+            if disc == check_finish(board=self.board, disc=disc):
+                logger.info("Player-%d won.", disc)
+                break
+            if 0 == check_finish(board=self.board, disc=disc):
+                logger.info("The board is full, resulting in a draw.")
+                break
+        logger.debug("1")
+
 
 if __name__ == "__main__":
     connect4 = Connect4()
@@ -155,3 +176,5 @@ if __name__ == "__main__":
     connect4.move(disc=1, col=3)  # Player 1 places a disc in column 3
 
     print(connect4.board)
+
+    connect4.game()
