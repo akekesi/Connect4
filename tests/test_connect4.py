@@ -16,6 +16,7 @@ The unittest framework is used for testing.
 
 import unittest
 import numpy as np
+
 from src.connect4 import Connect4
 
 

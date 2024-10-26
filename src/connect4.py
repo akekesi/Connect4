@@ -44,6 +44,7 @@ class Connect4:
         logger.debug("0")
         self.row = 6
         self.col = 7
+        self.win = 4
         self.discs = [1, 2]
         self.board = np.zeros((self.row, self.col))
         logger.info("board is initialized")
@@ -97,7 +98,7 @@ class Connect4:
             bool: True if the column index is valid, False otherwise.
         """
         logger.debug("0")
-        valid = (0 <= col < self.col)
+        valid = 0 <= col < self.col
         logger.info("%s", valid)
         logger.debug("1")
         return valid
@@ -113,7 +114,7 @@ class Connect4:
             bool: True if the row index is valid, False otherwise.
         """
         logger.debug("0")
-        valid = (0 <= row < self.row)
+        valid = 0 <= row < self.row
         logger.info("%s", valid)
         logger.debug("1")
         return valid
@@ -148,6 +149,8 @@ class Connect4:
         return True
 
     def game(self) -> None:
+        """
+        """
         # TODO: init board ???
         logger.debug("0")
         while True:
@@ -158,11 +161,11 @@ class Connect4:
             if not move_info:
                 logger.info("Invalid move.")
                 continue
-            print(connect4.board)
-            if disc == check_finish(board=self.board, disc=disc):
+            print(self.board)
+            if disc == check_finish(board=self.board, disc=disc, win=self.win):
                 logger.info("Player-%d won.", disc)
                 break
-            if 0 == check_finish(board=self.board, disc=disc):
+            if 0 == check_finish(board=self.board, disc=disc, win=self.win):
                 logger.info("The board is full, resulting in a draw.")
                 break
         logger.debug("1")
