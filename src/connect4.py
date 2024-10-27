@@ -1,6 +1,5 @@
-# TODO: agent random
 # TODO: agent minimax / alpha-beta
-# TODO: game with info (new game, 1/2player, difficulty,... )
+# TODO: game selection of start
 # TODO: mark the winning discs
 
 """
@@ -16,14 +15,15 @@ Classes:
 
 Example usage:
     connect4 = Connect4()
-    connect4.move(1, 3)  # Player 1 places a disc in column 3
-    connect4.move(2, 4)  # Player 2 places a disc in column 4
+    connect4.run()
 """
 
 import os
+import random
 import logging
 import numpy as np
 
+from typing import List
 from src.logger_config import Logging
 from src.check_finish import check_finish
 
@@ -58,8 +58,18 @@ class Connect4:
             1: "x",
             2: "o",
         }
-        self.board = np.zeros((self.row, self.col))
+        self.init_board()
         logger.info("board is initialized")
+        logger.debug("1")
+
+    def init_board(self) -> None:
+        """
+        Initializes an empty Connect4 board represented by a 2D NumPy array 
+        with dimensions defined by the number of rows and columns. Each cell 
+        is initialized to zero, indicating an empty space.
+        """
+        logger.debug("0")
+        self.board = np.zeros((self.row, self.col))
         logger.debug("1")
 
     def set_disc(self, disc: int, row: int, col: int) -> None:
@@ -73,7 +83,7 @@ class Connect4:
         """
         logger.debug("0")
         self.board[row, col] = disc
-        logger.info("disc is set")
+        logger.info("disc-%s is set into (%d, %d)", self.tiles[disc], row, col)
         logger.debug("1")
 
     def get_row(self, col: int) -> int:
@@ -98,6 +108,24 @@ class Connect4:
         logger.info("%d", row)
         logger.debug("1")
         return row
+
+    def get_valid_moves(self) -> List:
+        """
+        Returns a list of valid moves, where a move is represented as a 
+        list containing the row and column index.
+
+        Returns:
+            List: A list of lists, each containing the row and column 
+                index for a valid move.
+        """
+        logger.debug("0")
+        valid_moves = []
+        for col in range(self.col):
+            row = self.get_row(col=col)
+            if self.check_valid_row(row=row):
+                valid_moves.append([row, col])
+        logger.debug("1")
+        return valid_moves
 
     def check_valid_row(self, row: int) -> bool:
         """
@@ -131,6 +159,28 @@ class Connect4:
         logger.debug("1")
         return valid
 
+    def check_valid_input(self, input_: str) -> bool:
+        """
+        Checks if the input string can be converted to an integer, 
+        representing a valid column input.
+
+        Args:
+            input_ (str): The input string to validate.
+
+        Returns:
+            bool: True if the input is valid, False otherwise.
+        """
+        logger.debug("0")
+        try:
+            int(input_)
+            logger.info("True")
+            logger.debug("1")
+            return True
+        except ValueError:
+            logger.info("False")
+            logger.debug("2")
+            return False
+
     def move(self, disc: int, col: int) -> bool:
         """
         Makes a move by placing a disc in the specified column 
@@ -156,41 +206,151 @@ class Connect4:
             return False
 
         self.set_disc(disc=disc, row=row, col=col)
-        logger.info("move is done")
+        logger.info("move(%d, %d) is done", row, col)
         logger.debug("3")
         return True
 
-    def game(self) -> None:
-        # TODO: init board ???
+    def turn_player(self, disc: int) -> None:
+        """
+        Handles the player's turn by prompting for a column input and 
+        making the move if valid.
+
+        Args:
+            disc (int): The player's disc (1 or 2).
+        """
         logger.debug("0")
+        while True:
+            input_ = input(f"Enter column number to set '{self.tiles[disc]}' of player-{disc}: ")
+            if not self.check_valid_input(input_=input_):
+                continue
+            col = int(input_)
+            move_info = self.move(disc=disc, col=col)
+            if not move_info:
+                logger.info("invalid move.")
+                continue
+            break
+        logger.debug("1")
+
+    def turn_easy(self, disc: int) -> None:
+        """
+        Executes a turn for the computer player in "easy" mode, where 
+        a random valid move is selected.
+
+        Args:
+            disc (int): The player's disc (1 or 2).
+        """
+        logger.debug("0")
+        print(f"Enter column number to set '{self.tiles[disc]}' of player-{disc}: ")
+        valid_moves = self.get_valid_moves()
+        row, col = random.choice(valid_moves)
+        self.set_disc(disc=disc, row=row, col=col)
+        logger.info("move(%d, %d) is done", row, col)
+        logger.debug("1")
+
+    def turn_hard(self, disc: int) -> None:
+        """
+        Executes a turn for the computer player in "hard" mode.
+        # TODO: update this after implementation
+
+        Args:
+            disc (int): The player's disc (1 or 2).
+        """
+        raise NotImplementedError
+        # logger.debug("0")
+        # print(f"Enter column number to set '{self.tiles[disc]}' of player-{disc}: ")
+        # row, col = ???
+        # self.set_disc(disc=disc, row=row, col=col)
+        # logger.info("move(%d, %d) is done", row, col)
+        # logger.debug("1")
+
+    def game(self, type_: str) -> None:
+        """
+        Manages the flow of the game, allowing for different player 
+        configurations such as single-player, two-player, and AI modes.
+
+        Args:
+            type_ (str): Type of game mode:
+                            "2" for two-player 
+                            "e" for single-player easy
+                            "h" for single-player hard
+        """
+        logger.debug("0")
+        self.init_board()
         turn = 0
         self.print_pritty(turn=turn)
         while True:
             disc = self.discs[turn % 2]
             turn += 1
-            col = int(input(f"Enter column number to set '{self.tiles[disc]}' of player-{disc}: "))
-            # TODO: check input
-            move_info = self.move(disc=disc, col=col)
-            if not move_info:
-                logger.info("Invalid move.")
-                turn -= 1
-                continue
+            if type_ == "2":
+                self.turn_player(disc=disc)
+            if type_ == "e":
+                if disc == self.discs[0]:
+                    self.turn_player(disc=disc)
+                else:
+                    self.turn_easy(disc=disc)
+            if type_ == "h":
+                if disc == self.discs[0]:
+                    self.turn_player(disc=disc)
+                else:
+                    self.turn_hard(disc=disc)
             self.print_pritty(turn=turn)
             win = check_finish(board=self.board, disc=disc, win=self.win)
             if win == disc:
                 win_str = f"Player-{disc} won."
                 print(win_str)
                 logger.info(win_str)
+                logger.debug("1")
                 break
             if win == 0:
                 win_str = "The board is full, resulting in a draw."
                 print(win_str)
                 logger.info(win_str)
+                logger.debug("2")
                 break
-        logger.debug("1")
+
+    def run(self) -> None:
+        """
+        Initiates the Connect4 game with menu prompts for selecting 
+        game mode or quitting.
+        """
+        while True:
+            msg_game = "Game: g"
+            msg_quit = "Quit: q"
+            msg_game_1_player = "1-Player: 1"
+            msg_game_2_player = "2-Player: 2"
+            msg_game_easy = "Easy: e"
+            msg_game_hard = "Hard: h"
+
+            print(msg_game)
+            print(msg_quit)
+
+            answer = input()
+            if answer == "q":
+                return
+            if answer == "g":
+                print(msg_game_1_player)
+                print(msg_game_2_player)
+                answer = input()
+                if answer == "1":
+                    print(msg_game_easy)
+                    print(msg_game_hard)
+                    answer = input()
+                    if answer == "e":
+                        self.game(type_=answer)
+                    if answer == "h":
+                        self.game(type_=answer)
+                if answer == "2":
+                    self.game(type_=answer)
 
     def print_pritty(self, turn: int) -> None:
         """
+        Prints the current state of the game board in a formatted grid, 
+        showing the current turn number and positions of player discs.
+
+        Args:
+            turn (int): The current turn number.
+
+        Exaple:
         |==============|
         |              |
         |              |
@@ -220,4 +380,4 @@ class Connect4:
 if __name__ == "__main__":
     connect4 = Connect4()
 
-    connect4.game()
+    connect4.run()
