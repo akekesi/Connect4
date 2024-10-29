@@ -84,6 +84,16 @@ class TicTacToe:
     """
 
     def __init__(self) -> None:
+        """
+        Initializes a new Tic-Tac-Toe game with a 3x3 board.
+
+        Attributes
+        ----------
+        n : int
+            The size of the Tic-Tac-Toe board (3x3).
+        board : list
+            A 2D list representing the Tic-Tac-Toe board, initially empty with each cell set to a space (" ").
+        """
         self.n = 3
         self.board = [[" " for _ in range(self.n)] for _ in range(self.n)]
 
