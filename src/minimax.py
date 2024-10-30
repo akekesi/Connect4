@@ -2,6 +2,7 @@
 Implements the Minimax algorithm for optimal move decision-making in turn-based games.
 """
 
+
 from typing import Callable
 
 
@@ -20,6 +21,8 @@ class Minimax:
             func_remove: Callable[[tuple[int, int]], None],
             func_get_valid_moves: Callable[[], list[tuple[int, int]]],
         ) -> None:
+        # pylint: disable=line-too-long
+        # pylint: disable=too-many-arguments
         """
         Initializes the Minimax class with game functions.
 
@@ -42,7 +45,8 @@ class Minimax:
         maximizing or minimizing player, depending on the current turn.
 
         Args:
-            is_maximizing (bool): True if the current turn is for maximizing player, False otherwise.
+            is_maximizing (bool): True if the current turn is for maximizing player,
+            False otherwise.
 
         Returns:
             int: The optimal score for the current player.

@@ -33,9 +33,8 @@ Best move: (0, 0)
 Enter move (row, col): 
 
 The game continues until either player wins or the board is full.
-"""
 
-from src.minimax import Minimax
+"""
 
 
 class TicTacToe:
@@ -81,6 +80,7 @@ class TicTacToe:
         or the game ends in a draw.
     """
 
+
     def __init__(self) -> None:
         """
         Initializes a new Tic-Tac-Toe game with a 3x3 board.
@@ -97,8 +97,7 @@ class TicTacToe:
         self.board = [[" " for _ in range(self.n)] for _ in range(self.n)]
 
     def check_winner(self, player: str) -> bool:
-        """
-        Checks if the specified player has won the game.
+        """Checks if the specified player has won the game.
 
         Args:
             player (str): The symbol of the player to check ('X' or 'O').
@@ -163,6 +162,16 @@ class TicTacToe:
         """
         return [(x, y) for x in range(self.n) for y in range(self.n) if self.board[x][y] == " "]
 
+    def display_board(self) -> None:
+        """
+        Prints the current state of the board with lines separating cells.
+        """
+        line_horizontal = " ---" * self.n + " "
+        print(line_horizontal)
+        for row in self.board:
+            print("| " + " | ".join(row) + " |")
+            print(line_horizontal)
+
     def check_input(self, input_: str) -> bool:
         """
         Validates if the input string represents a valid move format 
@@ -210,15 +219,69 @@ class TicTacToe:
             return True
         return False
 
-    def display_board(self) -> None:
+
+    def minimax(self, is_maximizing: bool) -> int:
         """
-        Prints the current state of the board with lines separating cells.
+        Executes the Minimax algorithm to compute the best possible score for the 
+        maximizing or minimizing player, depending on the current turn.
+
+        Args:
+            is_maximizing (bool): True if the current turn is for maximizing player, 
+            False otherwise.
+
+        Returns:
+            int: The optimal score for the current player.
         """
-        line_horizontal = " ---" * self.n + " "
-        print(line_horizontal)
-        for row in self.board:
-            print("| " + " | ".join(row) + " |")
-            print(line_horizontal)
+        score = self.evaluate()
+        if score != 0 or not self.is_empty_cells():
+            return score
+
+        moves = self.get_valid_moves()
+        if is_maximizing:
+            score = -999
+            for move in moves:
+                self.move(move=move, player="X")
+                score = max(score, self.minimax(is_maximizing=False))
+                self.remove(move=move)
+        else:
+            score = 999
+            for move in moves:
+                self.move(move=move, player="O")
+                score = min(score, self.minimax(is_maximizing=True))
+                self.remove(move=move)
+        return score
+
+    def best_move(self, player: str) -> tuple[int, int]:
+        """
+        Determines the best move for the given player using the Minimax algorithm.
+
+        Args:
+            player (str): The player for whom to determine the best move ("X" or "O").
+
+        Returns:
+            tuple[int, int]: The best move (row, col) for the given player.
+        """
+        move_best = None
+        moves = self.get_valid_moves()
+        if player == "X":
+            score_best = -999
+            for move in moves:
+                self.move(move=move, player=player)
+                score = self.minimax(is_maximizing=False)
+                self.remove(move=move)
+                if score > score_best:
+                    score_best = score
+                    move_best = move
+        if player == "O":
+            score_best = 999
+            for move in moves:
+                self.move(move=move, player=player)
+                score = self.minimax(is_maximizing=True)
+                self.remove(move=move)
+                if score < score_best:
+                    score_best = score
+                    move_best = move
+        return move_best
 
     def play_game(self) -> None:
         """
@@ -226,19 +289,12 @@ class TicTacToe:
         to play until there is a winner or draw.
         """
         player = "X"
-        minimax = Minimax(
-            func_evaluate=self.evaluate,
-            func_is_empty_cells=self.is_empty_cells,
-            func_move=self.move,
-            func_remove=self.remove,
-            func_get_valid_moves=self.get_valid_moves,
-        )
         while True:
             print()
             print(f"{player}'s turn:")
             self.display_board()
             print("Best move: ", end="")
-            print(minimax.best_move(player=player))
+            print(self.best_move(player=player))
 
             input_ = input("Enter move (row, col): ")
             if not self.check_input(input_=input_):
@@ -252,16 +308,17 @@ class TicTacToe:
                 continue
 
             if self.check_winner(player=player):
-                print(f"{player} wins!")
+                msg_finish =f"{player} wins!"
                 break
 
             if not self.is_empty_cells():
-                print("It's a draw!")
+                msg_finish = "It's a draw!"
                 break
 
             player = "O" if player == "X" else "X"
 
         print()
+        print(msg_finish)
         self.display_board()
 
 
