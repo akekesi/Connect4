@@ -16,7 +16,7 @@ class Minimax:
     def __init__(
             self,
             func_evaluate: Callable[[], int],
-            func_is_empty_cells: Callable[[], bool],
+            func_check_full: Callable[[], bool],
             func_move: Callable[[tuple[int, int], str], None],
             func_remove: Callable[[tuple[int, int]], None],
             func_get_valid_moves: Callable[[], list[tuple[int, int]]],
@@ -34,7 +34,7 @@ class Minimax:
             func_get_valid_moves (Callable[[], list[tuple[int, int]]]): Function to get a list of valid moves.
         """
         self.func_evaluate = func_evaluate
-        self.func_is_empty_cells = func_is_empty_cells
+        self.func_check_full = func_check_full
         self.func_move = func_move
         self.func_remove = func_remove
         self.func_get_valid_moves = func_get_valid_moves
@@ -52,7 +52,7 @@ class Minimax:
             int: The optimal score for the current player.
         """
         score = self.func_evaluate()
-        if score != 0 or not self.func_is_empty_cells():
+        if score != 0 or self.func_check_full():
             return score
 
         moves = self.func_get_valid_moves()

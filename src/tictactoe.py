@@ -126,14 +126,14 @@ class TicTacToe:
             return -1
         return 0
 
-    def is_empty_cells(self) -> bool:
+    def check_full(self) -> bool:
         """
-        Checks if there are any empty cells on the board.
+        Checks if the board is full, meaning no empty cells remain.
 
         Returns:
-            bool: True if there are empty cells, False otherwise.
+            bool: True if all cells are filled, False if there are any empty cells.
         """
-        return any(cell == " " for row in self.board for cell in row)
+        return not any(cell == " " for row in self.board for cell in row)
 
     def move(self, move: tuple[int, int], player: str) -> None:
         """
@@ -228,7 +228,7 @@ class TicTacToe:
         player = "X"
         minimax = Minimax(
             func_evaluate=self.evaluate,
-            func_is_empty_cells=self.is_empty_cells,
+            func_check_full=self.check_full,
             func_move=self.move,
             func_remove=self.remove,
             func_get_valid_moves=self.get_valid_moves,
@@ -255,7 +255,7 @@ class TicTacToe:
                 print(f"{player} wins!")
                 break
 
-            if not self.is_empty_cells():
+            if self.check_full():
                 print("It's a draw!")
                 break
 
