@@ -48,11 +48,8 @@ class TicTacToe:
 
     Attributes
     ----------
-    n : int
-        The size of the game board (3x3).
-    board : list of lists
-        A 3x3 matrix representing the Tic-Tac-Toe board, where each cell
-        is either empty or marked by 'X' or 'O'.
+    n (int): The size of the Tic-Tac-Toe board (3x3).
+    board (list[list[int]]): A 2D list representing the Tic-Tac-Toe board, initially empty with each cell set to a space (" ").    
 
     Methods
     -------
@@ -87,11 +84,8 @@ class TicTacToe:
 
         Attributes
         ----------
-        n : int
-            The size of the Tic-Tac-Toe board (3x3).
-        board : list
-            A 2D list representing the Tic-Tac-Toe board, 
-            initially empty with each cell set to a space (" ").
+        n (int): The size of the Tic-Tac-Toe board (3x3).
+        board (list[list[int]]): A 2D list representing the Tic-Tac-Toe board, initially empty with each cell set to a space (" ").
         """
         self.n = 3
         self.board = [[" " for _ in range(self.n)] for _ in range(self.n)]
