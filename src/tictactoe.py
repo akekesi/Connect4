@@ -56,22 +56,22 @@ class TicTacToe:
 
     Methods
     -------
-    check_winner(player: str) -> bool
-        Checks if the specified player has won the game.
-    evaluate() -> int
-        Evaluates the game board to determine if 'X' or 'O' has won.
-    is_empty_cells() -> bool
-        Checks if there are any empty cells left on the board.
     move(move: tuple[int, int], player: str) -> None
         Places the player's mark on the specified board position.
     remove(move: tuple[int, int]) -> None
         Removes a mark from a specified board position, setting it to empty.
     get_valid_moves() -> list[tuple[int, int]]
         Retrieves a list of all valid (empty) moves on the board.
-    check_input(input_: str) -> bool
-        Validates if the user input is in the correct format (row and column integers).
     check_move(move: tuple[int, int]) -> bool
         Checks if a move is within bounds and in an empty cell.
+    check_input(input_: str) -> bool
+        Validates if the user input is in the correct format (row and column integers).
+    check_winner(player: str) -> bool
+        Checks if the specified player has won the game.
+    check_full() -> bool
+        Checks if the board is full, meaning no empty cells remain.
+    evaluate() -> int
+        Evaluates the game board to determine if 'X' or 'O' has won.
     make_move(move: tuple[int, int], player: str) -> bool
         Places a mark if the move is valid and returns success status.
     display_board() -> None
@@ -95,45 +95,6 @@ class TicTacToe:
         """
         self.n = 3
         self.board = [[" " for _ in range(self.n)] for _ in range(self.n)]
-
-    def check_winner(self, player: str) -> bool:
-        """
-        Checks if the specified player has won the game.
-
-        Args:
-            player (str): The symbol of the player to check ('X' or 'O').
-
-        Returns:
-            bool: True if the player has won, False otherwise.
-        """
-        for i in range(self.n):
-            if all(self.board[i][j] == player for j in range(self.n)) or \
-               all(self.board[j][i] == player for j in range(self.n)):
-                return True
-        return all(self.board[i][i] == player for i in range(self.n)) or \
-               all(self.board[i][self.n - 1 - i] == player for i in range(self.n))
-
-    def evaluate(self) -> int:
-        """
-        Evaluates the board for game state.
-
-        Returns:
-            int: 1 if 'X' wins, -1 if 'O' wins, 0 for a draw.
-        """
-        if self.check_winner("X"):
-            return 1
-        if self.check_winner("O"):
-            return -1
-        return 0
-
-    def check_full(self) -> bool:
-        """
-        Checks if the board is full, meaning no empty cells remain.
-
-        Returns:
-            bool: True if all cells are filled, False if there are any empty cells.
-        """
-        return not any(cell == " " for row in self.board for cell in row)
 
     def move(self, move: tuple[int, int], player: str) -> None:
         """
@@ -163,6 +124,20 @@ class TicTacToe:
         """
         return [(x, y) for x in range(self.n) for y in range(self.n) if self.board[x][y] == " "]
 
+    def check_move(self, move: tuple[int, int]) -> bool:
+        """
+        Checks if the move is valid (within bounds and cell is empty).
+
+        Args:
+            move (tuple[int, int]): The (row, col) position to check.
+
+        Returns:
+            bool: True if the move is valid, False otherwise.
+        """
+        return 0 <= move[0] < self.n and \
+               0 <= move[1] < self.n and \
+               self.board[move[0]][move[1]] == " "
+
     def check_input(self, input_: str) -> bool:
         """
         Validates if the input string represents a valid move format 
@@ -180,19 +155,44 @@ class TicTacToe:
         except ValueError:
             return False
 
-    def check_move(self, move: tuple[int, int]) -> bool:
+    def check_winner(self, player: str) -> bool:
         """
-        Checks if the move is valid (within bounds and cell is empty).
+        Checks if the specified player has won the game.
 
         Args:
-            move (tuple[int, int]): The (row, col) position to check.
+            player (str): The symbol of the player to check ('X' or 'O').
 
         Returns:
-            bool: True if the move is valid, False otherwise.
+            bool: True if the player has won, False otherwise.
         """
-        return 0 <= move[0] < self.n and \
-               0 <= move[1] < self.n and \
-               self.board[move[0]][move[1]] == " "
+        for i in range(self.n):
+            if all(self.board[i][j] == player for j in range(self.n)) or \
+               all(self.board[j][i] == player for j in range(self.n)):
+                return True
+        return all(self.board[i][i] == player for i in range(self.n)) or \
+               all(self.board[i][self.n - 1 - i] == player for i in range(self.n))
+
+    def check_full(self) -> bool:
+        """
+        Checks if the board is full, meaning no empty cells remain.
+
+        Returns:
+            bool: True if all cells are filled, False if there are any empty cells.
+        """
+        return not any(cell == " " for row in self.board for cell in row)
+
+    def evaluate(self) -> int:
+        """
+        Evaluates the board for game state.
+
+        Returns:
+            int: 1 if 'X' wins, -1 if 'O' wins, 0 for a draw.
+        """
+        if self.check_winner("X"):
+            return 1
+        if self.check_winner("O"):
+            return -1
+        return 0
 
     def make_move(self, move: tuple[int, int], player: str) -> bool:
         """
