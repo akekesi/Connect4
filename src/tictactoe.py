@@ -188,9 +188,9 @@ class TicTacToe:
         Returns:
             int: 1 if 'X' wins, -1 if 'O' wins, 0 for a draw.
         """
-        if self.check_winner("X"):
+        if self.check_winner(player="X"):
             return 1
-        if self.check_winner("O"):
+        if self.check_winner(player="O"):
             return -1
         return 0
 
