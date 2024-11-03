@@ -1,3 +1,4 @@
+# TODO: use enum for players' discs
 # TODO: agent minimax / alpha-beta
 # TODO: put agents in folders like isis example
 # TODO: option for selection of beginner player
@@ -9,6 +10,7 @@ import os
 import random
 import logging
 
+from src.minimax import Minimax
 from src.logger_config import Logging
 from src.check_end import check_winner, check_full
 
@@ -16,8 +18,8 @@ from src.check_end import check_winner, check_full
 # set logger up
 logger = Logging().set_logger(
     name="Connect4",
-    # level=logging.NOTSET,
-    level=logging.INFO,
+    level=logging.NOTSET,
+    # level=logging.INFO,
     # level=logging.DEBUG,
     path_dir=os.path.join(os.path.dirname(__file__), "..", "logs")
 )
@@ -31,9 +33,9 @@ class Connect4:
         """
         """
         logger.debug("0")
-        self.row = 6
-        self.col = 7
-        self.win = 4
+        self.row = 3
+        self.col = 4
+        self.win = 3
         self.board = None
         self.init_board()
         logger.info("board is initialized")
@@ -72,10 +74,10 @@ class Connect4:
             if self.board[row][col] == " ":
                 row_free = row
             else:
-                return row_free
-        logger.info("%d", row)
+                break
+        logger.info("%d", row_free)
         logger.debug("1")
-        return row
+        return row_free
 
     def get_valid_moves(self) -> list[tuple[int, int]]:
         """
@@ -107,20 +109,6 @@ class Connect4:
         logger.debug("1")
         return valid
 
-    def check_input(self, input_: str) -> bool:
-        """
-        """
-        logger.debug("0")
-        try:
-            int(input_)
-            logger.info("True")
-            logger.debug("1")
-            return True
-        except ValueError:
-            logger.info("False")
-            logger.debug("2")
-            return False
-
     def check_move(self, col: int) -> tuple[int, int] | None:
         """
         """
@@ -136,16 +124,63 @@ class Connect4:
             return None
         return (row, col)
 
+    def check_input(self, input_: str) -> bool:
+        """
+        """
+        logger.debug("0")
+        try:
+            int(input_)
+            logger.info("True")
+            logger.debug("1")
+            return True
+        except ValueError:
+            logger.info("False")
+            logger.debug("2")
+            return False
+
+    def check_winner(self, player: str) -> bool:
+        """
+        Checks if the specified player has won the game.
+
+        Args:
+            player (str): The symbol of the player to check ('X' or 'O').
+
+        Returns:
+            bool: True if the player has won, False otherwise.
+        """
+        return check_winner(board=self.board, player=player, win=self.win)
+
+    def check_full(self) -> bool:
+        """
+        Checks if the board is full, meaning no empty cells remain.
+
+        Returns:
+            bool: True if all cells are filled, False if there are any empty cells.
+        """
+        return check_full(board=self.board)
+
+    def evaluate(self) -> int:
+        """
+        Evaluates the board for game state.
+
+        Returns:
+            int: 1 if 'X' wins, -1 if 'O' wins, 0 for a draw.
+        """
+        if check_winner(board=self.board, player="X", win=self.win):
+            return 1
+        if check_winner(board=self.board, player="O", win=self.win):
+            return -1
+        return 0
+
     def make_move(self, player: str, col: int) -> bool:
         """
         """
         logger.debug("0")
-
         move = self.check_move(col=col)
         if not isinstance(move, tuple):
             logger.debug("1")
             return False
-        self.move(player=player, move=move)
+        self.move(move=move, player=player)
         logger.info("move(%d, %d) is done", move[0], move[1])
         logger.debug("2")
         return True
@@ -164,12 +199,15 @@ class Connect4:
         |0 1 2 3 4 5 6|
         """
         logger.debug("0")
-        print("|=============|")
+        n = self.col * 2 - 1
+        line_horizontal = "=" * (n)
+        line_numbers = [str(x) for x in range(self.col)]
+        print("|" + line_horizontal + "|")
         for row in self.board:
             print("|" + " ".join(row) + "|")
-        print("|=============|")
-        print("|0 1 2 3 4 5 6|")
-        print(f"|{f'Turn:{turn:02}':=^13}|")
+        print("|" + line_horizontal + "|")
+        print("|" + " ".join(line_numbers) + "|")
+        print(f"|{f'{turn:03}':=^{n}}|")
         print()
         logger.debug("1")
 
@@ -193,23 +231,32 @@ class Connect4:
         """
         """
         logger.debug("0")
-        print(f"Enter column number to set '{player}' of player-{player}: ")
+        print(f"Enter column number to set '{player}' of player-{player}: ", end="")
         valid_moves = self.get_valid_moves()
         move = random.choice(valid_moves)
-        self.move(player=player, move=move)
+        print(f"{move[1]}")
+        self.move(move=move, player=player)
         logger.info("move(%d, %d) is done", move[0], move[1])
         logger.debug("1")
 
     def turn_hard(self, player: str) -> None:
         """
         """
-        raise NotImplementedError
-        # logger.debug("0")
-        # print(f"Enter column number to set '{self.tiles[disc]}' of player-{disc}: ")
-        # row, col = ???
-        # self.set_disc(player=player, row=row, col=col)
-        # logger.info("move(%d, %d) is done", row, col)
-        # logger.debug("1")
+        logger.debug("0")
+        minimax = Minimax(
+            func_evaluate=self.evaluate,
+            func_check_full=self.check_full,
+            func_move=self.move,
+            func_remove=self.remove,
+            func_get_valid_moves=self.get_valid_moves,
+        )
+        # print(f"Enter column number to set '{player}' of player-{player}: ", end="")
+        move = minimax.best_move(player=player)
+        print(f"Best move: {move} --> col: {move[1]}")
+        # print(f"{move[1]}")
+        # self.move(move=move, player=player)
+        logger.info("move(%d, %d) is done", move[0], move[1])
+        logger.debug("1")
 
     def play_game(self, type_: str) -> None:
         """
@@ -229,10 +276,12 @@ class Connect4:
                 else:
                     self.turn_easy(player=player)
             if type_ == "h":
-                if player == "X":
-                    self.turn_player(player=player)
-                else:
-                    self.turn_hard(player=player)
+                self.turn_hard(player=player)
+                self.turn_player(player=player)
+                # if player == "X":
+                #     self.turn_player(player=player)
+                # else:
+                #     self.turn_hard(player=player)
             self.display_board(turn=turn)
             if check_winner(board=self.board, player=player, win=self.win):
                 win_str = f"Player-{player} won."
@@ -253,34 +302,38 @@ class Connect4:
         """
         logger.debug("0")
         while True:
-            msg_game = "Game: g"
-            msg_quit = "Quit: q"
-            msg_game_1_player = "1-Player: 1"
-            msg_game_2_player = "2-Player: 2"
-            msg_game_easy = "Easy: e"
-            msg_game_hard = "Hard: h"
+            msg_game = "Start a new game (enter 'g')"
+            msg_quit = "Quit the program (enter 'q')"
+            msg_game_1_player = "Play in 1-Player mode (enter '1')"
+            msg_game_2_player = "Play in 2-Player mode (enter '2')"
+            msg_game_easy = "Choose Easy difficulty (enter 'e')"
+            msg_game_hard = "Choose Hard difficulty (enter 'h')"
 
             print(msg_game)
             print(msg_quit)
 
-            answer = input()
+            answer = input("Enter your choice: ")
+            print()
             if answer == "q":
                 logger.debug("1")
                 return
             if answer == "g":
                 print(msg_game_1_player)
                 print(msg_game_2_player)
-                answer = input()
+                answer = input("Select mode: ")
+                print()
                 if answer == "1":
                     print(msg_game_easy)
                     print(msg_game_hard)
-                    answer = input()
+                    answer = input("Choose difficulty: ")
+                    print()
                     if answer == "e":
                         self.play_game(type_=answer)
                     if answer == "h":
                         self.play_game(type_=answer)
                 if answer == "2":
                     self.play_game(type_=answer)
+                print()
 
 
 if __name__ == "__main__":

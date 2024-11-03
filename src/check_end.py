@@ -1,11 +1,9 @@
 """
 """
 
-import numpy as np
-
 
 # pylint: disable=too-many-return-statements
-def check_winner(board: np.ndarray, player: str, win: int) -> bool:
+def check_winner(board: list[list[int]], player: str, win: int) -> bool:
     """
     """
     if check_winner_horizontal(board=board, player=player, win=win):
@@ -22,7 +20,7 @@ def check_winner(board: np.ndarray, player: str, win: int) -> bool:
         return True
     return False
 
-def check_winner_horizontal(board: np.ndarray, player: str, win: int) -> bool:
+def check_winner_horizontal(board: list[list[int]], player: str, win: int) -> bool:
     """
     """
     row = len(board)
@@ -39,7 +37,7 @@ def check_winner_horizontal(board: np.ndarray, player: str, win: int) -> bool:
     return False
 
 
-def check_winner_vertical(board: np.ndarray, player: str, win: int) -> bool:
+def check_winner_vertical(board: list[list[int]], player: str, win: int) -> bool:
     """
     """
     row = len(board)
@@ -56,7 +54,7 @@ def check_winner_vertical(board: np.ndarray, player: str, win: int) -> bool:
     return False
 
 
-def check_winner_diagonal_left_pos(board: np.ndarray, player: str, win: int) -> bool:
+def check_winner_diagonal_left_pos(board: list[list[int]], player: str, win: int) -> bool:
     """
     """
     row = len(board)
@@ -75,7 +73,7 @@ def check_winner_diagonal_left_pos(board: np.ndarray, player: str, win: int) -> 
     return False
 
 
-def check_winner_diagonal_right_neg(board: np.ndarray, player: str, win: int) -> bool:
+def check_winner_diagonal_right_neg(board: list[list[int]], player: str, win: int) -> bool:
     """
     """
     row = len(board)
@@ -94,7 +92,7 @@ def check_winner_diagonal_right_neg(board: np.ndarray, player: str, win: int) ->
     return False
 
 
-def check_winner_diagonal_top_pos(board: np.ndarray, player: str, win: int) -> bool:
+def check_winner_diagonal_top_pos(board: list[list[int]], player: str, win: int) -> bool:
     """
     """
     row = len(board)
@@ -113,7 +111,7 @@ def check_winner_diagonal_top_pos(board: np.ndarray, player: str, win: int) -> b
     return False
 
 
-def check_winner_diagonal_top_neg(board: np.ndarray, player: str, win: int) -> bool:
+def check_winner_diagonal_top_neg(board: list[list[int]], player: str, win: int) -> bool:
     """
     """
     row = len(board)
