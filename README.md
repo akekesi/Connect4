@@ -71,27 +71,34 @@ $ pip install -r requirements.txt
 $ pip install -r requirements_dev.txt
 ```
 
-### 2. Running Connect4
+### 2. Running TikTakToe
+TikTacToe demonstrates the use of minimax in a simplified setting, offering a practical example of how the algorithm can be applied to solve game-based problems.
+```
+$ python -m src.ticktackoe          # using Minimax as external class
+$ python -m src.ticktackoe_minimax  # using Minimax as internal method
+```
+
+### 3. Running Connect4
 ```
 $ python -m src.connect4
 ```
 
-### 3. Running Pylint (with `requirements_dev.txt`)
+### 4. Running Pylint (with `requirements_dev.txt`)
 ```
 $ pylint src/<name_of_file>
 ```
 
-### 4. Running a Single Unit Test (with `requirements_dev.txt`)
+### 5. Running a Single Unit Test (with `requirements_dev.txt`)
 ```
 $ python -m tests.<name_of_test_file>
 ```
 
-### 5. Running All Unit Tests (with `requirements_dev.txt`)
+### 6. Running All Unit Tests (with `requirements_dev.txt`)
 ```
 $ python -m unittest discover tests
 ```
 
-### 6. Running Coverage with Unit Tests (with `requirements_dev.txt`)
+### 7. Running Coverage with Unit Tests (with `requirements_dev.txt`)
 ```
 $ python -m coverage run -m unittest discover tests
 $ python -m coverage report
