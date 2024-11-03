@@ -229,8 +229,8 @@ class TicTacToe:
         )
         while True:
             print()
-            print(f"{player}'s turn:")
             self.display_board()
+            print(f"{player}'s turn:")
             print("Best move: ", end="")
             print(minimax.best_move(player=player))
 
