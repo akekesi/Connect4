@@ -121,7 +121,7 @@ class TestConnect4(unittest.TestCase):
         """
         # Test empty column:
         for col in range(self.connect4.col):
-            self.assertEqual(self.connect4.get_row(col=col), 5)
+            self.assertEqual(self.connect4.get_row(col=col), self.connect4.row - 1)
 
         # Test not empty column:
         player = "X"
