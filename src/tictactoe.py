@@ -20,7 +20,8 @@ or follow the recommended moves.
 
 Example
 -------
-$ python tictactoe.py
+$ python -m src.tictactoe
+
 X's turn:
  --- --- --- 
 |   |   |   |
@@ -34,6 +35,7 @@ Enter move (row, col):
 
 The game continues until either player wins or the board is full.
 """
+
 
 from src.minimax import Minimax
 
@@ -49,7 +51,8 @@ class TicTacToe:
     Attributes
     ----------
     n (int): The size of the Tic-Tac-Toe board (3x3).
-    board (list[list[int]]): A 2D list representing the Tic-Tac-Toe board, initially empty with each cell set to a space (" ").    
+    board (list[list[int]]): A 2D list representing the Tic-Tac-Toe board, 
+                             initially empty with each cell set to a space (" ").    
 
     Methods
     -------
@@ -85,7 +88,8 @@ class TicTacToe:
         Attributes
         ----------
         n (int): The size of the Tic-Tac-Toe board (3x3).
-        board (list[list[int]]): A 2D list representing the Tic-Tac-Toe board, initially empty with each cell set to a space (" ").
+        board (list[list[int]]): A 2D list representing the Tic-Tac-Toe board, 
+                                 initially empty with each cell set to a space (" ").
         """
         self.n = 3
         self.board = [[" " for _ in range(self.n)] for _ in range(self.n)]
@@ -183,9 +187,9 @@ class TicTacToe:
             int: 1 if 'X' wins, -1 if 'O' wins, 0 for a draw.
         """
         if self.check_winner(player="X"):
-            return 1
+            return self.n ** 2
         if self.check_winner(player="O"):
-            return -1
+            return -self.n ** 2
         return 0
 
     def make_move(self, move: tuple[int, int], player: str) -> bool:
@@ -229,8 +233,8 @@ class TicTacToe:
         )
         while True:
             print()
-            self.display_board()
             print(f"{player}'s turn:")
+            self.display_board()
             print("Best move: ", end="")
             print(minimax.best_move(player=player))
 
@@ -246,19 +250,19 @@ class TicTacToe:
                 continue
 
             if self.check_winner(player=player):
+                print()
                 print(f"{player} wins!")
                 break
 
             if self.check_full():
+                print()
                 print("It's a draw!")
                 break
 
             player = "O" if player == "X" else "X"
-
-        print()
         self.display_board()
 
 
 if __name__ == "__main__":
-    game = TicTacToe()
-    game.play_game()
+    tictactoe = TicTacToe()
+    tictactoe.play_game()
