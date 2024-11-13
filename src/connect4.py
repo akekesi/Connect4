@@ -6,6 +6,7 @@
 """
 """
 
+
 import os
 import random
 import logging
@@ -33,10 +34,11 @@ class Connect4:
         """
         """
         logger.debug("0")
-        self.row = 3
-        self.col = 4
-        self.win = 3
+        self.row = 6
+        self.col = 7
+        self.win = 4
         self.board = None
+        self.depth_max = 5
         self.init_board()
         logger.info("board is initialized")
         logger.debug("1")
@@ -167,9 +169,9 @@ class Connect4:
             int: 1 if 'X' wins, -1 if 'O' wins, 0 for a draw.
         """
         if check_winner(board=self.board, player="X", win=self.win):
-            return 1
+            return self.row * self.col
         if check_winner(board=self.board, player="O", win=self.win):
-            return -1
+            return -self.row * self.col
         return 0
 
     def make_move(self, player: str, col: int) -> bool:
@@ -249,12 +251,12 @@ class Connect4:
             func_move=self.move,
             func_remove=self.remove,
             func_get_valid_moves=self.get_valid_moves,
+            depth_max=self.depth_max,
         )
-        # print(f"Enter column number to set '{player}' of player-{player}: ", end="")
+        print(f"Enter column number to set '{player}' of player-{player}: ", end="")
         move = minimax.best_move(player=player)
-        print(f"Best move: {move} --> col: {move[1]}")
-        # print(f"{move[1]}")
-        # self.move(move=move, player=player)
+        print(f"{move[1]}")
+        self.move(move=move, player=player)
         logger.info("move(%d, %d) is done", move[0], move[1])
         logger.debug("1")
 
@@ -276,12 +278,10 @@ class Connect4:
                 else:
                     self.turn_easy(player=player)
             if type_ == "h":
-                self.turn_hard(player=player)
-                self.turn_player(player=player)
-                # if player == "X":
-                #     self.turn_player(player=player)
-                # else:
-                #     self.turn_hard(player=player)
+                if player == "X":
+                    self.turn_hard(player=player)
+                else:
+                    self.turn_player(player=player)
             self.display_board(turn=turn)
             if check_winner(board=self.board, player=player, win=self.win):
                 win_str = f"Player-{player} won."
