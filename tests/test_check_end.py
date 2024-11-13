@@ -142,6 +142,50 @@ class TestCheckEnd(unittest.TestCase):
                 self.assertFalse(check_full(board=self.board))
                 self.board[row][col] = player
 
+    def test_random_states(self):
+        """
+        """
+        win = 3
+        self.board = [
+            [" ", " ", " ", " ",],
+            [" ", " ", "O", " ",],
+            [" ", "O", "X", " ",],
+            ["O", "X", "X", "X",],
+        ]
+        self.assertTrue(check_winner(board=self.board, player="X", win=win))
+        self.assertTrue(check_winner(board=self.board, player="O", win=win))
+        self.assertFalse(check_full(board=self.board))
+
+        self.board = [
+            [" ", " ", " ", " ",],
+            ["O", " ", "O", " ",],
+            ["X", " ", "X", " ",],
+            ["O", "X", "X", "X",],
+        ]
+        self.assertTrue(check_winner(board=self.board, player="X", win=win))
+        self.assertFalse(check_winner(board=self.board, player="O", win=win))
+        self.assertFalse(check_full(board=self.board))
+
+        self.board = [
+            [" ", " ", " ", " ",],
+            [" ", " ", " ", " ",],
+            [" ", "O", " ", " ",],
+            ["O", "X", "X", "X",],
+        ]
+        self.assertTrue(check_winner(board=self.board, player="X", win=win))
+        self.assertFalse(check_winner(board=self.board, player="O", win=win))
+        self.assertFalse(check_full(board=self.board))
+
+        self.board = [
+            [" ", " ", " ", " ",],
+            [" ", " ", " ", " ",],
+            ["O", " ", " ", " ",],
+            ["O", "X", "X", "X",],
+        ]
+        self.assertTrue(check_winner(board=self.board, player="X", win=win))
+        self.assertFalse(check_winner(board=self.board, player="O", win=win))
+        self.assertFalse(check_full(board=self.board))
+
 
 if __name__ == "__main__":
     unittest.main()
