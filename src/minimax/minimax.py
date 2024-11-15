@@ -1,35 +1,25 @@
 """
-Implements the Minimax algorithm for optimal move decision-making in turn-based games.
+This module implements the Minimax algorithm for decision-making in two-player games. 
+It provides a `Minimax` class to calculate the optimal move based on an evaluation function 
+and simulates future game states using recursive search.
 """
 
-
 from typing import Callable
+from src.utils.players import Players
 
 
 class Minimax:
     """
-    A Minimax class to implement the Minimax algorithm for decision-making in turn-based games.
-    The algorithm utilizes evaluation and move functions provided during initialization to recursively
-    simulate moves and return optimal decisions for maximizing or minimizing players, with an optional
-    depth limit to improve performance in complex games.
+    A class implementing the Minimax algorithm for decision-making in two-player games. The algorithm computes the optimal move
+    for a player by simulating all possible moves and evaluating the resulting game states using a heuristic evaluation function.
 
     Attributes:
-        func_evaluate (Callable[[], int]): A function to evaluate the current board state and return a score.
-        func_check_full (Callable[[], bool]): A function to check if the game board is full (no more moves).
-        func_move (Callable[[tuple[int, int], str], None]): A function to make a move on the board.
-        func_remove (Callable[[tuple[int, int]], None]): A function to remove a move from the board.
-        func_get_valid_moves (Callable[[], list[tuple[int, int]]]): A function to retrieve a list of valid moves.
-        depth_max (int): Maximum depth for recursion in the minimax algorithm. Limits the search to improve
-                         performance by stopping after reaching this depth.
-
-    Methods:
-        minimax(is_maximizing: bool, depth: int) -> int:
-            Recursively calculates the optimal score for the maximizing or minimizing player
-            up to a specified maximum depth. Stops if a win/loss, full board, or max depth is reached.
-        
-        best_move(player: str) -> tuple[int, int]:
-            Determines the best move for the specified player using the Minimax algorithm.
-            Iterates through all valid moves and calculates scores to select the optimal move.
+        func_evaluate (Callable[[], int]): A function to evaluate the current game state and return a score.
+        func_check_full (Callable[[], bool]): A function to check if the game board is full, indicating a draw.
+        func_move (Callable[[tuple[int, int], str], None]): A function to make a move on the game board.
+        func_remove (Callable[[tuple[int, int]], None]): A function to undo a move on the game board.
+        func_get_valid_moves (Callable[[], list[tuple[int, int]]]): A function to get a list of valid moves for the current player.
+        depth_max (int): The maximum depth to search during the minimax algorithm. Defaults to infinity for unlimited depth.
     """
 
     def __init__(
@@ -41,18 +31,16 @@ class Minimax:
             func_get_valid_moves: Callable[[], list[tuple[int, int]]],
             depth_max: int = float("inf")
         ) -> None:
-        # pylint: disable=line-too-long
-        # pylint: disable=too-many-arguments
         """
-        Initializes the Minimax class with game-specific functions and a depth limit.
+        Initializes the Minimax object with the required functions and maximum search depth.
 
         Args:
-            func_evaluate (Callable[[], int]): Function to evaluate the board state and return a score.
-            func_check_full (Callable[[], bool]): Function to check if the board is fully occupied.
-            func_move (Callable[[tuple[int, int], str], None]): Function to make a move on the board.
-            func_remove (Callable[[tuple[int, int]], None]): Function to remove a move from the board.
-            func_get_valid_moves (Callable[[], list[tuple[int, int]]]): Function to get a list of valid moves.
-            depth_max (int): Optional; maximum depth for the minimax search (default is inf).
+            func_evaluate (Callable[[], int]): A function to evaluate the current game state and return a score.
+            func_check_full (Callable[[], bool]): A function to check if the game board is full, indicating a draw.
+            func_move (Callable[[tuple[int, int], str], None]): A function to make a move on the game board.
+            func_remove (Callable[[tuple[int, int]], None]): A function to undo a move on the game board.
+            func_get_valid_moves (Callable[[], list[tuple[int, int]]]): A function to get a list of valid moves for the current player.
+            depth_max (int, optional): The maximum depth for the Minimax algorithm to search. Defaults to infinity for unlimited depth.
         """
         self.func_evaluate = func_evaluate
         self.func_check_full = func_check_full
@@ -63,17 +51,17 @@ class Minimax:
 
     def minimax(self, is_maximizing: bool, depth: int) -> int:
         """
-        Executes the Minimax algorithm to compute the optimal score for the current player
-        up to a maximum depth. Adjusts scores based on the depth to prioritize faster wins
-        or delayed losses.
+        Recursively calculates the minimax score for the current game state.
+
+        This method evaluates all possible moves for the current player, simulates them, and returns the best score based on
+        whether the current player is maximizing or minimizing their score.
 
         Args:
-            is_maximizing (bool): True if the current player is maximizing, False otherwise.
-            depth (int): Current depth of the recursive search, incremented with each call.
+            is_maximizing (bool): Whether the current player is trying to maximize their score (True) or minimize it (False).
+            depth (int): The current depth of the recursion.
 
         Returns:
-            int: The optimal score for the player at the current board state, considering
-                 the specified max depth.
+            int: The best score for the current game state.
         """
         score = self.func_evaluate()
         if score != 0 or self.func_check_full() or depth == self.depth_max:
@@ -83,33 +71,34 @@ class Minimax:
         if is_maximizing:
             max_score = -float("inf")
             for move in moves:
-                self.func_move(move=move, player="X")
+                self.func_move(move=move, player=Players.P1.value)
                 max_score = max(max_score, self.minimax(is_maximizing=False, depth=depth + 1))
                 self.func_remove(move=move)
             return max_score
         else:
             min_score = float("inf")
             for move in moves:
-                self.func_move(move=move, player="O")
+                self.func_move(move=move, player=Players.P2.value)
                 min_score = min(min_score, self.minimax(is_maximizing=True, depth=depth + 1))
                 self.func_remove(move=move)
             return min_score
 
     def best_move(self, player: str) -> tuple[int, int]:
         """
-        Determines the best possible move for the specified player using the Minimax algorithm.
-        Considers all valid moves, applies the Minimax function to each, and selects the move
-        with the highest or lowest score based on player type.
+        Calculates the best move for the given player using the Minimax algorithm.
+
+        This method evaluates all valid moves for the player and returns the move with the best score based on the
+        Minimax evaluation.
 
         Args:
-            player (str): The player making the move, typically "X" (maximizing) or "O" (minimizing).
+            player (str): The player for whom to calculate the best move.
 
         Returns:
-            tuple[int, int]: The coordinates of the best move for the player on the game board.
+            tuple[int, int]: The coordinates of the best move for the given player.
         """
         move_best = None
         moves = self.func_get_valid_moves()
-        if player == "X":
+        if player == Players.P1.value:
             score_best = -float("inf")
             for move in moves:
                 self.func_move(move=move, player=player)
@@ -118,7 +107,7 @@ class Minimax:
                 if score > score_best:
                     score_best = score
                     move_best = move
-        if player == "O":
+        if player == Players.P2.value:
             score_best = float("inf")
             for move in moves:
                 self.func_move(move=move, player=player)

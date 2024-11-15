@@ -2,41 +2,14 @@
 Two-Player Tic-Tac-Toe Game with Minimax Move Recommendations
 
 This module provides a command-line Tic-Tac-Toe game for two players, with real-time
-move recommendations based on the Minimax algorithm. Both players, 'X' and 'O', receive
+move recommendations based on the Minimax algorithm. Both players, receive
 suggested moves for optimal gameplay, though they can choose their own moves as well.
 
-Classes
--------
-TicTacToe
-    A class that represents the Tic-Tac-Toe game, including methods for displaying
-    the board, validating moves, making moves, checking for a winner, and using the
-    Minimax algorithm to recommend the best moves for both players.
-
-Usage
------
-Run this module to start a two-player game. Each turn, the current player receives
-a recommended move based on the Minimax algorithm. Players can input their own moves
-or follow the recommended moves.
-
-Example
--------
-$ python -m src.tictactoe
-
-X's turn:
- --- --- --- 
-|   |   |   |
- --- --- --- 
-|   |   |   |
- --- --- --- 
-|   |   |   |
- --- --- --- 
-Best move: (0, 0)
-Enter move (row, col): 
-
-The game continues until either player wins or the board is full.
+Run:
+$ python -m src.tictactoe.tictactoe
 """
 
-
+from src.utils.players import Players
 from src.minimax.minimax import Minimax
 
 
@@ -48,48 +21,15 @@ class TicTacToe:
     interactively between two players. The class offers move validation, win detection,
     and real-time optimal move suggestions using the Minimax algorithm.
 
-    Attributes
-    ----------
+    Attributes:
     n (int): The size of the Tic-Tac-Toe board (3x3).
     board (list[list[int]]): A 2D list representing the Tic-Tac-Toe board, 
-                             initially empty with each cell set to a space (" ").    
-
-    Methods
-    -------
-    move(move: tuple[int, int], player: str) -> None
-        Places the player's mark on the specified board position.
-    remove(move: tuple[int, int]) -> None
-        Removes a mark from a specified board position, setting it to empty.
-    get_valid_moves() -> list[tuple[int, int]]
-        Retrieves a list of all valid (empty) moves on the board.
-    check_move(move: tuple[int, int]) -> bool
-        Checks if a move is within bounds and in an empty cell.
-    check_input(input_: str) -> bool
-        Validates if the user input is in the correct format (row and column integers).
-    check_winner(player: str) -> bool
-        Checks if the specified player has won the game.
-    check_full() -> bool
-        Checks if the board is full, meaning no empty cells remain.
-    evaluate() -> int
-        Evaluates the game board to determine if 'X' or 'O' has won.
-    make_move(move: tuple[int, int], player: str) -> bool
-        Places a mark if the move is valid and returns success status.
-    display_board() -> None
-        Displays the current game board with separators for clarity.
-    play_game() -> None
-        Starts the game loop, allowing two players to take turns until a winner is found
-        or the game ends in a draw.
+                             initially empty with each cell set to a space (" ").
     """
 
     def __init__(self) -> None:
         """
         Initializes a new Tic-Tac-Toe game with a 3x3 board.
-
-        Attributes
-        ----------
-        n (int): The size of the Tic-Tac-Toe board (3x3).
-        board (list[list[int]]): A 2D list representing the Tic-Tac-Toe board, 
-                                 initially empty with each cell set to a space (" ").
         """
         self.n = 3
         self.board = [[" " for _ in range(self.n)] for _ in range(self.n)]
@@ -100,7 +40,7 @@ class TicTacToe:
 
         Args:
             move (tuple[int, int]): The (row, col) position on the board.
-            player (str): The symbol of the player ('X' or 'O').
+            player (str): The symbol of the player.
         """
         self.board[move[0]][move[1]] = player
 
@@ -158,7 +98,7 @@ class TicTacToe:
         Checks if the specified player has won the game.
 
         Args:
-            player (str): The symbol of the player to check ('X' or 'O').
+            player (str): The symbol of the player to check.
 
         Returns:
             bool: True if the player has won, False otherwise.
@@ -184,11 +124,11 @@ class TicTacToe:
         Evaluates the board for game state.
 
         Returns:
-            int: 1 if 'X' wins, -1 if 'O' wins, 0 for a draw.
+            int: 1 if player-1 wins, -1 if player-2 wins, 0 for a draw.
         """
-        if self.check_winner(player="X"):
+        if self.check_winner(player=Players.P1.value):
             return self.n ** 2
-        if self.check_winner(player="O"):
+        if self.check_winner(player=Players.P2.value):
             return -self.n ** 2
         return 0
 
@@ -198,7 +138,7 @@ class TicTacToe:
 
         Args:
             move (tuple[int, int]): The (row, col) position on the board.
-            player (str): The symbol of the player ('X' or 'O').
+            player (str): The symbol of the player.
 
         Returns:
             bool: True if the move was successful, False otherwise.
@@ -220,10 +160,10 @@ class TicTacToe:
 
     def play_game(self) -> None:
         """
-        Runs the game loop where 'X' and 'O' take turns
+        Runs the game loop where player-1 and player-2 take turns
         to play until there is a winner or draw.
         """
-        player = "X"
+        player = Players.P1
         minimax = Minimax(
             func_evaluate=self.evaluate,
             func_check_full=self.check_full,
@@ -233,10 +173,10 @@ class TicTacToe:
         )
         while True:
             print()
-            print(f"{player}'s turn:")
+            print(f"{player.value}'s turn:")
             self.display_board()
             print("Best move: ", end="")
-            print(minimax.best_move(player=player))
+            print(minimax.best_move(player=player.value))
 
             input_ = input("Enter move (row, col): ")
             if not self.check_input(input_=input_):
@@ -245,21 +185,21 @@ class TicTacToe:
             x, y = map(int, input_.split())
             move = (x, y)
 
-            if not self.make_move(move=move, player=player):
+            if not self.make_move(move=move, player=player.value):
                 print("Invalid move. Try again.")
                 continue
 
-            if self.check_winner(player=player):
+            if self.check_winner(player=player.value):
                 print()
-                print(f"{player} wins!")
+                print(f"Player-{player.value} won.")
                 break
 
             if self.check_full():
                 print()
-                print("It's a draw!")
+                print("The board is full, resulting in a draw.")
                 break
 
-            player = "O" if player == "X" else "X"
+            player = Players.P2 if player == Players.P1 else Players.P1
         self.display_board()
 
 

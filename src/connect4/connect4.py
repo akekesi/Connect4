@@ -5,20 +5,14 @@ This module provides the implementation of the Connect4 game, including function
 for initializing the game, making moves, checking for a winner, and playing against 
 an AI agent with different difficulty levels.
 
-Classes:
-    Player: Enum to represent player tokens (X and O).
-    Connect4: Main class to manage the Connect4 game logic.
-
-Functions:
-    check_winner: Check if a player has won the game.
-    check_full: Check if the board is full.
+Run:
+$ python -m src.connect4.connect4
 """
-
 
 import os
 import random
 import logging
-from enum import Enum
+from src.utils.players import Players
 from src.minimax.minimax import Minimax
 from src.logger.logger_config import Logging
 from src.utils.check_end import check_winner, check_full
@@ -31,18 +25,6 @@ logger = Logging().set_logger(
     # level=logging.DEBUG,
     path_dir=os.path.join(os.path.dirname(__file__), "..", "..", "logs")
 )
-
-
-class Player(Enum):
-    """
-    Enumeration for player tokens.
-    
-    Attributes:
-        P1 (str): Token for Player 1 ('X').
-        P2 (str): Token for Player 2 ('O').
-    """
-    P1 = "X"
-    P2 = "O"
 
 
 class Connect4:
@@ -84,7 +66,7 @@ class Connect4:
 
         Args:
             move (tuple[int, int]): The row and column indices for the move.
-            player (str): The token of the player.
+            player (str): The token of the players.
         """
         logger.debug("called")
         self.board[move[0]][move[1]] = player
@@ -239,10 +221,10 @@ class Connect4:
         """
         logger.debug("called")
         n = self.row * self.col
-        if check_winner(board=self.board, player=Player.P1.value, win=self.win):
+        if check_winner(board=self.board, player=Players.P1.value, win=self.win):
             logger.info("%d", n)
             return n
-        if check_winner(board=self.board, player=Player.P2.value, win=self.win):
+        if check_winner(board=self.board, player=Players.P2.value, win=self.win):
             logger.info("%d", -n)
             return -n
         logger.info("%d", 0)
@@ -301,7 +283,7 @@ class Connect4:
         Manages the turn for a human player, prompting them for input until a valid move is made.
 
         Args:
-            player (str): The symbol of the current player.
+            player (str): The symbol of the current players.
         """
         logger.debug("called")
         while True:
@@ -319,7 +301,7 @@ class Connect4:
         Manages the turn for an easy-level AI agent, selecting a random valid move.
 
         Args:
-            player (str): The symbol of the AI player.
+            player (str): The symbol of the AI players.
         """
         logger.debug("called")
         print(f"Enter column number to set '{player}' of player-{player}: ", end="")
@@ -333,7 +315,7 @@ class Connect4:
         Manages the turn for a hard-level AI agent, selecting the best move using the minimax algorithm.
 
         Args:
-            player (str): The symbol of the AI player.
+            player (str): The symbol of the AI players.
         """
         logger.debug("called")
         minimax = Minimax(
@@ -360,7 +342,7 @@ class Connect4:
         logger.debug("called")
         self.init_board()
         turn = 0
-        player = Player.P1
+        player = Players.P1
         self.display_board(turn=turn)
         while True:
             turn += 1
@@ -371,13 +353,13 @@ class Connect4:
             if type_ == "e":
                 # First move: player
                 if first_move == "p":
-                    if player == Player.P1:
+                    if player == Players.P1:
                         self.turn_player(player=player.value)
                     else:
                         self.turn_agent_easy(player=player.value)
                 # First move: agent
                 if first_move == "a":
-                    if player == Player.P1:
+                    if player == Players.P1:
                         self.turn_agent_easy(player=player.value)
                     else:
                         self.turn_player(player=player.value)
@@ -385,13 +367,13 @@ class Connect4:
             if type_ == "h":
                 # First move: player
                 if first_move == "p":
-                    if player == Player.P1:
+                    if player == Players.P1:
                         self.turn_player(player=player.value)
                     else:
                         self.turn_agent_hard(player=player.value)
                 # First move: agent
                 if first_move == "a":
-                    if player == Player.P1:
+                    if player == Players.P1:
                         self.turn_agent_hard(player=player.value)
                     else:
                         self.turn_player(player=player.value)
@@ -406,7 +388,7 @@ class Connect4:
                 print(win_str)
                 logger.info(win_str)
                 break
-            player = Player.P2 if player == Player.P1 else Player.P1
+            player = Players.P2 if player == Players.P1 else Players.P1
 
     def get_input(self, message: str, answers: list[str], message_error: str = "Try again") -> str:
         """
@@ -455,13 +437,13 @@ class Connect4:
                 return
             # Start the game
             if answer_game == "g":
-                answers_player = self.get_input(
+                answer_player = self.get_input(
                     message=message_player,
                     answers=answers_player,
                 )
-                type_ = answers_player
+                type_ = answer_player
                 # 1-Player
-                if answers_player == "1":
+                if answer_player == "1":
                     answer_difficulty = self.get_input(
                         message=message_difficulty,
                         answers=answers_difficulty,
@@ -478,7 +460,7 @@ class Connect4:
                     if answer_difficulty == "h":
                         self.play_game(type_=type_, first_move=answer_first_move)
                 # 2-Player
-                if answers_player == "2":
+                if answer_player == "2":
                     self.play_game(type_=type_)
                 print()
 
