@@ -1,7 +1,3 @@
-# TODO: use enum for players' discs
-# TODO: agent minimax / alpha-beta
-# TODO: put agents in folders like isis example
-# TODO: option for selection of beginner player
 # TODO: mark the winning discs
 """
 """
@@ -11,6 +7,7 @@ import os
 import random
 import logging
 
+from enum import Enum
 from src.minimax import Minimax
 from src.logger_config import Logging
 from src.check_end import check_winner, check_full
@@ -24,6 +21,11 @@ logger = Logging().set_logger(
     # level=logging.DEBUG,
     path_dir=os.path.join(os.path.dirname(__file__), "..", "logs")
 )
+
+
+class Player(Enum):
+    P1 = "X"
+    P2 = "O"
 
 
 class Connect4:
@@ -168,9 +170,9 @@ class Connect4:
         Returns:
             int: 1 if 'X' wins, -1 if 'O' wins, 0 for a draw.
         """
-        if check_winner(board=self.board, player="X", win=self.win):
+        if check_winner(board=self.board, player=Player.P1.value, win=self.win):
             return self.row * self.col
-        if check_winner(board=self.board, player="O", win=self.win):
+        if check_winner(board=self.board, player=Player.P2.value, win=self.win):
             return -self.row * self.col
         return 0
 
@@ -266,37 +268,44 @@ class Connect4:
         logger.debug("0")
         self.init_board()
         turn = 0
-        player = "X"
+        player = Player.P1
         self.display_board(turn=turn)
         while True:
             turn += 1
+            # 2-Player
             if type_ == "2":
-                self.turn_player(player=player)
+                self.turn_player(player=player.value)
+            # 1-Player-Easy
             if type_ == "e":
+                # First move: player
                 if first_move == "p":
-                    if player == "X":
-                        self.turn_player(player=player)
+                    if player == Player.P1:
+                        self.turn_player(player=player.value)
                     else:
-                        self.turn_agent_easy(player=player)
+                        self.turn_agent_easy(player=player.value)
+                # First move: agent
                 if first_move == "a":
-                    if player == "X":
-                        self.turn_agent_easy(player=player)
+                    if player == Player.P1:
+                        self.turn_agent_easy(player=player.value)
                     else:
-                        self.turn_player(player=player)
+                        self.turn_player(player=player.value)
+            # 1-Player-Hard
             if type_ == "h":
+                # First move: player
                 if first_move == "p":
-                    if player == "X":
-                        self.turn_player(player=player)
+                    if player == Player.P1:
+                        self.turn_player(player=player.value)
                     else:
-                        self.turn_agent_hard(player=player)
-                else:
-                    if player == "X":
-                        self.turn_agent_hard(player=player)
+                        self.turn_agent_hard(player=player.value)
+                # First move: agent
+                if first_move == "a":
+                    if player == Player.P1:
+                        self.turn_agent_hard(player=player.value)
                     else:
-                        self.turn_player(player=player)
+                        self.turn_player(player=player.value)
             self.display_board(turn=turn)
-            if check_winner(board=self.board, player=player, win=self.win):
-                win_str = f"Player-{player} won."
+            if check_winner(board=self.board, player=player.value, win=self.win):
+                win_str = f"Player-{player.value} won."
                 print(win_str)
                 logger.info(win_str)
                 logger.debug("1")
@@ -307,49 +316,71 @@ class Connect4:
                 logger.info(win_str)
                 logger.debug("2")
                 break
-            player = "O" if player == "X" else "X"
+            player = Player.P2 if player == Player.P1 else Player.P1
+
+    def get_input(self, message: str, answers: list[str], message_error: str = "Try again") -> str:
+        """
+        """
+        logger.debug("0")
+        while True:
+            answer = input(message)
+            logger.info(answer)
+            if answer in answers:
+                print()
+                logger.debug("1")
+                return answer
+            print(message_error)
+            print()
 
     def run(self) -> None:
         """
         """
         logger.debug("0")
         while True:
-            msg_game = "Start a new game (enter 'g')"
-            msg_quit = "Quit the program (enter 'q')"
-            msg_game_1_player = "Play in 1-Player mode (enter '1')"
-            msg_game_2_player = "Play in 2-Player mode (enter '2')"
-            msg_game_easy = "Easy difficulty (enter 'e')"
-            msg_game_hard = "Hard difficulty (enter 'h')"
-            msg_game_player = "Player moves first (enter 'p')"
-            msg_game_agent = "Agent moves first (enter 'a')"
+            message_game = "Start a new game (enter 'g')\nQuit the program (enter 'q')\nEnter your choice: "
+            answers_game = ["g", "q"]
+            message_player = "Play in 1-Player mode (enter '1')\nPlay in 2-Player mode (enter '2')\nSelect mode: "
+            answers_player = ["1", "2"]
+            message_difficulty = "Easy difficulty (enter 'e')\nHard difficulty (enter 'h')\nChoose difficulty: "
+            answers_difficulty = ["e", "h"]
+            message_first_move = "Agent moves first (enter 'a')\nPlayer moves first (enter 'p')\nWho does move first: "
+            answers_first_move = ["p", "a"]
 
-            print(msg_game)
-            print(msg_quit)
-            answer_game = input("Enter your choice: ")
-            print()
+            answer_game = self.get_input(
+                message=message_game,
+                answers=answers_game,
+            )
+            # Quit the game
             if answer_game == "q":
                 logger.debug("1")
                 return
+            # Start the game
             if answer_game == "g":
-                print(msg_game_1_player)
-                print(msg_game_2_player)
-                answer_type = input("Select mode: ")
-                print()
-                if answer_type == "1":
-                    print(msg_game_easy)
-                    print(msg_game_hard)
-                    answer_type = input("Choose difficulty: ")
-                    print()
-                    print(msg_game_player)
-                    print(msg_game_agent)
-                    answer_first_move = input("Who does move first: ")
-                    print()
-                    if answer_type == "e":
-                        self.play_game(type_=answer_type, first_move=answer_first_move)
-                    if answer_type == "h":
-                        self.play_game(type_=answer_type, first_move=answer_first_move)
-                if answer_type == "2":
-                    self.play_game(type_=answer_type)
+                answers_player = self.get_input(
+                    message=message_player,
+                    answers=answers_player,
+                )
+                type_ = answers_player
+                # 1-Player
+                if answers_player == "1":
+                    answer_difficulty = self.get_input(
+                        message=message_difficulty,
+                        answers=answers_difficulty,
+                    )
+                    answer_first_move = self.get_input(
+                        message=message_first_move,
+                        answers=answers_first_move,
+                    )
+                    type_ = answer_difficulty
+                    # Easy
+                    if answer_difficulty == "e":
+                        self.play_game(type_=type_, first_move=answer_first_move)
+                    # Hard
+                    if answer_difficulty == "h":
+                        self.play_game(type_=type_, first_move=answer_first_move)
+                # 2-Player
+                if answers_player == "2":
+                    self.play_game(type_=type_)
                 print()
 
 
