@@ -1,17 +1,27 @@
-# TODO: mark the winning discs
 """
+Connect4 Game Module
+
+This module provides the implementation of the Connect4 game, including functionalities 
+for initializing the game, making moves, checking for a winner, and playing against 
+an AI agent with different difficulty levels.
+
+Classes:
+    Player: Enum to represent player tokens (X and O).
+    Connect4: Main class to manage the Connect4 game logic.
+
+Functions:
+    check_winner: Check if a player has won the game.
+    check_full: Check if the board is full.
 """
 
 
 import os
 import random
 import logging
-
 from enum import Enum
 from src.minimax import Minimax
 from src.logger_config import Logging
 from src.check_end import check_winner, check_full
-
 
 # set logger up
 logger = Logging().set_logger(
@@ -24,134 +34,190 @@ logger = Logging().set_logger(
 
 
 class Player(Enum):
+    """
+    Enumeration for player tokens.
+    
+    Attributes:
+        P1 (str): Token for Player 1 ('X').
+        P2 (str): Token for Player 2 ('O').
+    """
     P1 = "X"
     P2 = "O"
 
 
 class Connect4:
     """
+    Connect4 game logic and functionalities.
+
+    Attributes:
+        row (int): Number of rows in the board.
+        col (int): Number of columns in the board.
+        win (int): Number of consecutive tokens needed to win.
+        board (list): 2D list representing the game board.
+        depth_max (int): Maximum depth for the minimax algorithm.
     """
 
     def __init__(self) -> None:
         """
+        Initializes the Connect4 game with a default 6x7 board and win condition of 4 tokens.
         """
-        logger.debug("0")
+        logger.debug("called")
         self.row = 6
         self.col = 7
         self.win = 4
         self.board = None
         self.depth_max = 5
         self.init_board()
-        logger.info("board is initialized")
-        logger.debug("1")
+        logger.info("game is initialized")
 
     def init_board(self) -> None:
         """
+        Resets the game board to its initial state (empty cells).
         """
-        logger.debug("0")
+        logger.debug("called")
         self.board = [[" " for _ in range(self.col)] for _ in range(self.row)]
-        logger.debug("1")
+        logger.info("board is initialized")
 
     def move(self, move: tuple[int, int], player: str) -> None:
         """
+        Places a player's token on the board.
+
+        Args:
+            move (tuple[int, int]): The row and column indices for the move.
+            player (str): The token of the player.
         """
-        logger.debug("0")
+        logger.debug("called")
         self.board[move[0]][move[1]] = player
         logger.info("player-%s is moved into (%d, %d)", player, move[0], move[1])
-        logger.debug("1")
 
     def remove(self, move: tuple[int, int]) -> None:
         """
+        Removes a player's token from the board.
+
+        Args:
+            move (tuple[int, int]): The row and column indices to remove the token from.
         """
-        logger.debug("0")
+        logger.debug("called")
         player = self.board[move[0]][move[1]]
         self.board[move[0]][move[1]] = " "
         logger.info("player-%s is removed from (%d, %d)", player, move[0], move[1])
-        logger.debug("1")
 
     def get_row(self, col: int) -> int:
         """
+        Finds the lowest available row in a column.
+
+        Args:
+            col (int): The column index.
+
+        Returns:
+            int: The row index of the lowest available cell, or -1 if the column is full.
         """
-        logger.debug("0")
+        logger.debug("called")
         row_free = -1
         for row in range(self.row):
             if self.board[row][col] == " ":
                 row_free = row
             else:
                 break
-        logger.info("%d", row_free)
-        logger.debug("1")
+        logger.info("col(%d) --> %d", col, row_free)
         return row_free
 
     def get_valid_moves(self) -> list[tuple[int, int]]:
         """
+        Gets all valid moves (empty cells) on the board.
+
+        Returns:
+            list[tuple[int, int]]: List of tuples representing valid moves.
         """
-        logger.debug("0")
+        logger.debug("called")
         valid_moves = []
         for col in range(self.col):
             row = self.get_row(col=col)
             if self.check_row(row=row):
                 valid_moves.append((row, col))
-        logger.debug("1")
+        logger.info("%s: %s", row, valid_moves)
         return valid_moves
 
     def check_row(self, row: int) -> bool:
         """
+        Checks if a row index is valid.
+
+        Args:
+            row (int): The row index to check.
+
+        Returns:
+            bool: True if the row is valid, False otherwise.
         """
-        logger.debug("0")
+        logger.debug("called")
         valid = 0 <= row < self.row
-        logger.info("%s", valid)
-        logger.debug("1")
+        logger.info("%s: %s", row, valid)
         return valid
 
     def check_col(self, col: int) -> bool:
         """
+        Checks if a column index is valid.
+
+        Args:
+            col (int): The column index to check.
+
+        Returns:
+            bool: True if the column is valid, False otherwise.
         """
-        logger.debug("0")
+        logger.debug("called")
         valid = 0 <= col < self.col
-        logger.info("%s", valid)
-        logger.debug("1")
+        logger.info("%s, %s", col, valid)
         return valid
 
     def check_move(self, col: int) -> tuple[int, int] | None:
         """
+        Validates a move by checking the column and row.
+
+        Args:
+            col (int): The column index of the move.
+
+        Returns:
+            tuple[int, int] | None: The valid move as a tuple, or None if invalid.
         """
-        logger.debug("0")
+        logger.debug("called")
         if not self.check_col(col=col):
-            logger.info("invalid col = %d", col)
-            logger.debug("1")
             return None
         row = self.get_row(col=col)
         if not self.check_row(row=row):
-            logger.info("invalid row = %d", row)
-            logger.debug("2")
             return None
         return (row, col)
 
     def check_input(self, input_: str) -> bool:
         """
+        Validates if the input is an integer.
+
+        Args:
+            input_ (str): Input string to validate.
+
+        Returns:
+            bool: True if the input is an integer, False otherwise.
         """
-        logger.debug("0")
+        logger.debug("called")
         try:
             int(input_)
-            logger.info("True")
-            logger.debug("1")
-            return True
+            result = True
+            logger.info("%s: %s", input_, result)
+            return result
         except ValueError:
-            logger.info("False")
-            logger.debug("2")
-            return False
+            result = False
+            logger.info("%s: %s", input_, result)
+            return result
 
     def check_winner(self, player: str) -> bool:
         """
         Checks if the specified player has won the game.
 
         Args:
-            player (str): The symbol of the player to check ('X' or 'O').
+            player (str): The symbol of the player to check.
 
         Returns:
             bool: True if the player has won, False otherwise.
         """
+        logger.debug("called")
         return check_winner(board=self.board, player=player, win=self.win)
 
     def check_full(self) -> bool:
@@ -161,6 +227,7 @@ class Connect4:
         Returns:
             bool: True if all cells are filled, False if there are any empty cells.
         """
+        logger.debug("called")
         return check_full(board=self.board)
 
     def evaluate(self) -> int:
@@ -168,29 +235,44 @@ class Connect4:
         Evaluates the board for game state.
 
         Returns:
-            int: 1 if 'X' wins, -1 if 'O' wins, 0 for a draw.
+            int: (row * col) if player-1 wins, -(row * col) if playe-2 wins, 0 for a draw.
         """
+        logger.debug("called")
+        n = self.row * self.col
         if check_winner(board=self.board, player=Player.P1.value, win=self.win):
-            return self.row * self.col
+            logger.info("%d", n)
+            return n
         if check_winner(board=self.board, player=Player.P2.value, win=self.win):
-            return -self.row * self.col
+            logger.info("%d", -n)
+            return -n
+        logger.info("%d", 0)
         return 0
 
     def make_move(self, player: str, col: int) -> bool:
         """
+        Makes a move for the specified player at the given column.
+
+        Args:
+            player (str): The symbol of the player making the move.
+            col (int): The column where the player wants to place their symbol.
+
+        Returns:
+            bool: True if the move was successful, False if the move was invalid.
         """
-        logger.debug("0")
+        logger.debug("called")
         move = self.check_move(col=col)
         if not isinstance(move, tuple):
-            logger.debug("1")
             return False
         self.move(move=move, player=player)
-        logger.info("move(%d, %d) is done", move[0], move[1])
-        logger.debug("2")
         return True
 
     def display_board(self, turn: int) -> None:
         """
+        Displays the current state of the board, including the turn number.
+
+        Args:
+            turn (int): The current turn number.
+
         Exaple:
         |=============|
         |             |
@@ -202,7 +284,7 @@ class Connect4:
         |=============|
         |0 1 2 3 4 5 6|
         """
-        logger.debug("0")
+        logger.debug("called")
         n = self.col * 2 - 1
         line_horizontal = "=" * (n)
         line_numbers = [str(x) for x in range(self.col)]
@@ -213,12 +295,15 @@ class Connect4:
         print("|" + " ".join(line_numbers) + "|")
         print(f"|{f'{turn:03}':=^{n}}|")
         print()
-        logger.debug("1")
 
     def turn_player(self, player: str) -> None:
         """
+        Manages the turn for a human player, prompting them for input until a valid move is made.
+
+        Args:
+            player (str): The symbol of the current player.
         """
-        logger.debug("0")
+        logger.debug("called")
         while True:
             input_ = input(f"Enter column number to set '{player}' of player-{player}: ")
             if not self.check_input(input_=input_):
@@ -226,27 +311,31 @@ class Connect4:
             col = int(input_)
             move_info = self.make_move(player=player, col=col)
             if not move_info:
-                logger.info("invalid move.")
                 continue
             break
-        logger.debug("1")
 
     def turn_agent_easy(self, player: str) -> None:
         """
+        Manages the turn for an easy-level AI agent, selecting a random valid move.
+
+        Args:
+            player (str): The symbol of the AI player.
         """
-        logger.debug("0")
+        logger.debug("called")
         print(f"Enter column number to set '{player}' of player-{player}: ", end="")
         valid_moves = self.get_valid_moves()
         move = random.choice(valid_moves)
         print(f"{move[1]}")
         self.move(move=move, player=player)
-        logger.info("move(%d, %d) is done", move[0], move[1])
-        logger.debug("1")
 
     def turn_agent_hard(self, player: str) -> None:
         """
+        Manages the turn for a hard-level AI agent, selecting the best move using the minimax algorithm.
+
+        Args:
+            player (str): The symbol of the AI player.
         """
-        logger.debug("0")
+        logger.debug("called")
         minimax = Minimax(
             func_evaluate=self.evaluate,
             func_check_full=self.check_full,
@@ -259,13 +348,16 @@ class Connect4:
         move = minimax.best_move(player=player)
         print(f"{move[1]}")
         self.move(move=move, player=player)
-        logger.info("move(%d, %d) is done", move[0], move[1])
-        logger.debug("1")
 
     def play_game(self, type_: str, first_move: str = "") -> None:
         """
+        Starts and manages the game based on the selected game type and first move.
+
+        Args:
+            type_ (str): The game mode ('2' for 2-player, 'e' for 1-player easy, 'h' for 1-player hard).
+            first_move (str): The player or agent that should make the first move ('p' for player, 'a' for agent).
         """
-        logger.debug("0")
+        logger.debug("called")
         self.init_board()
         turn = 0
         player = Player.P1
@@ -308,51 +400,58 @@ class Connect4:
                 win_str = f"Player-{player.value} won."
                 print(win_str)
                 logger.info(win_str)
-                logger.debug("1")
                 break
             if check_full(board=self.board):
                 win_str = "The board is full, resulting in a draw."
                 print(win_str)
                 logger.info(win_str)
-                logger.debug("2")
                 break
             player = Player.P2 if player == Player.P1 else Player.P1
 
     def get_input(self, message: str, answers: list[str], message_error: str = "Try again") -> str:
         """
+        Prompts the user for input and ensures that the answer is one of the valid options.
+
+        Args:
+            message (str): The prompt message to display to the user.
+            answers (list[str]): A list of valid answers that the user can input.
+            message_error (str): The message to display if the user provides an invalid answer.
+
+        Returns:
+            str: The valid input provided by the user.
         """
-        logger.debug("0")
+        logger.debug("called")
         while True:
             answer = input(message)
             logger.info(answer)
             if answer in answers:
                 print()
-                logger.debug("1")
                 return answer
             print(message_error)
             print()
 
     def run(self) -> None:
         """
-        """
-        logger.debug("0")
-        while True:
-            message_game = "Start a new game (enter 'g')\nQuit the program (enter 'q')\nEnter your choice: "
-            answers_game = ["g", "q"]
-            message_player = "Play in 1-Player mode (enter '1')\nPlay in 2-Player mode (enter '2')\nSelect mode: "
-            answers_player = ["1", "2"]
-            message_difficulty = "Easy difficulty (enter 'e')\nHard difficulty (enter 'h')\nChoose difficulty: "
-            answers_difficulty = ["e", "h"]
-            message_first_move = "Agent moves first (enter 'a')\nPlayer moves first (enter 'p')\nWho does move first: "
-            answers_first_move = ["p", "a"]
+        Runs the main game loop, allowing the user to choose game options, modes, and difficulty levels.
 
+        The game continues until the user chooses to quit or a winner is determined.
+        """
+        logger.debug("called")
+        message_game = "Start a new game (enter 'g')\nQuit the program (enter 'q')\nEnter your choice: "
+        answers_game = ["g", "q"]
+        message_player = "Play in 1-Player mode (enter '1')\nPlay in 2-Player mode (enter '2')\nSelect mode: "
+        answers_player = ["1", "2"]
+        message_difficulty = "Easy difficulty (enter 'e')\nHard difficulty (enter 'h')\nChoose difficulty: "
+        answers_difficulty = ["e", "h"]
+        message_first_move = "Agent moves first (enter 'a')\nPlayer moves first (enter 'p')\nWho does move first: "
+        answers_first_move = ["p", "a"]
+        while True:
             answer_game = self.get_input(
                 message=message_game,
                 answers=answers_game,
             )
             # Quit the game
             if answer_game == "q":
-                logger.debug("1")
                 return
             # Start the game
             if answer_game == "g":
