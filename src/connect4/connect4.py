@@ -19,9 +19,9 @@ import os
 import random
 import logging
 from enum import Enum
-from src.minimax import Minimax
-from src.logger_config import Logging
-from src.check_end import check_winner, check_full
+from src.minimax.minimax import Minimax
+from src.logger.logger_config import Logging
+from src.utils.check_end import check_winner, check_full
 
 # set logger up
 logger = Logging().set_logger(
@@ -29,7 +29,7 @@ logger = Logging().set_logger(
     level=logging.NOTSET,
     # level=logging.INFO,
     # level=logging.DEBUG,
-    path_dir=os.path.join(os.path.dirname(__file__), "..", "logs")
+    path_dir=os.path.join(os.path.dirname(__file__), "..", "..", "logs")
 )
 
 

@@ -37,7 +37,7 @@ The game continues until either player wins or the board is full.
 """
 
 
-from src.minimax import Minimax
+from src.minimax.minimax import Minimax
 
 
 class TicTacToe:

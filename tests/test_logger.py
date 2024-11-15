@@ -17,7 +17,7 @@ import shutil
 import logging
 import unittest
 
-from src.logger_config import Logging
+from src.logger.logger_config import Logging
 
 
 class TestLogging(unittest.TestCase):

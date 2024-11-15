@@ -3,7 +3,7 @@
 
 import unittest
 
-from src.check_end import check_winner, check_full
+from src.utils.check_end import check_winner, check_full
 
 
 class TestCheckEnd(unittest.TestCase):

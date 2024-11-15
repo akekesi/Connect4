@@ -3,7 +3,7 @@
 
 import unittest
 
-from src.connect4 import Connect4
+from src.connect4.connect4 import Connect4
 
 
 class TestConnect4(unittest.TestCase):
