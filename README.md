@@ -32,7 +32,7 @@
 ## Description
 🚧 This project is a work in progress. Some features may be incomplete, untested, or lacking full documentation. 🚧  
 
-This project was initially developed as an assignment for the [TU Berlin Programming Project in Python [WiSe 2024/25]](https://isis.tu-berlin.de/course/view.php?id=40758). In this project, [Connect4](https://en.wikipedia.org/wiki/Connect_Four) is implemented using fundamental concepts of "software carpentry," including:
+This project was initially developed as an assignment for the [TU Berlin Programming Project in Python [WiSe 2024/25]](https://isis.tu-berlin.de/course/view.php?id=40758). In this project, [Connect4](https://en.wikipedia.org/wiki/Connect_Four) is implemented using fundamental concepts of "software carpentry", including:
 - Use of a version control system, such as Git
 - Test-driven development
 - Documentation
@@ -99,9 +99,9 @@ $ python -m unittest discover tests
 
 ### 7. Running Coverage with Unit Tests (with `requirements_dev.txt`)
 ```
-$ python -m coverage run -m unittest discover tests
-$ python -m coverage report
-$ python -m coverage html
+$ coverage run -m unittest discover tests
+$ coverage report
+$ coverage html
 ```
 View the HTML coverage report at: `htmlcov/index.html`
 
