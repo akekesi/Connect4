@@ -11,11 +11,11 @@
    [![Shell Script](https://img.shields.io/badge/Shell_Script-✔-blue)](https://en.wikipedia.org/wiki/Shell_script)
 </div>
 
-<!-- <p align="center">
+<p align="center">
    <a href="#demo" title="Click to view full-size GIF in Demo section">
-      <img src="gif/connec4_demo.gif" alt="connec4_demo_gif">
+      <img src="gif/connect4_demo_50.gif" alt="connec4_demo_gif">
   </a>
-</p> -->
+</p>
 
 ## Table of Contents
 1. [Description](#description)
@@ -41,9 +41,9 @@ This project was initially developed as an assignment for the [TU Berlin Program
 
 
 ## Demo
-<!-- <p align="center">
-  <img src="gif/connect4_demo_gif" alt="connect4_demo_gif">
-</p> -->
+<p align="center">
+  <img src="gif/connect4_demo.gif" alt="connect4_demo_gif">
+</p>
 
 ## Prerequisites
 - [Python 3.12.0](https://www.python.org/downloads/release/python-3120/)
@@ -127,6 +127,7 @@ $ python -m src.connect4
 - [ ] Make unit test for minimax.py
 - [ ] MAke unit test for tictactoe.py
 - [x] ~~Add logging~~
+- [x] ~~Add demo~~
 - [ ] Add version
 - [ ] Add setup.py, .toml
 - [x] ~~Add badges (GitHub Actions CI)~~
