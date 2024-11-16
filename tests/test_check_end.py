@@ -1,4 +1,9 @@
 """
+Unit tests for the check_end module, which verifies the game logic
+for checking a Connect4 winner and detecting a full board.
+
+Run:
+$ python -m tests.test_check_end
 """
 
 import unittest
@@ -8,6 +13,9 @@ from src.utils.check_end import check_winner, check_full
 
 class TestCheckEnd(unittest.TestCase):
     """
+    Unit tests for the check_end module.
+    The tests cover scenarios such as empty board, horizontal, vertical, diagonal wins, full board, 
+    and random board states.
     """
     row = 6
     col = 7
@@ -30,6 +38,8 @@ class TestCheckEnd(unittest.TestCase):
 
     def test_empty(self):
         """
+        Test case for an empty board.
+        Verifies that no player wins and the board is not full on an empty board.
         """
         player = "X"
         self.assertFalse(check_winner(board=self.board, player=player, win=self.win))
@@ -39,6 +49,8 @@ class TestCheckEnd(unittest.TestCase):
 
     def test_horizontal_only(self):
         """
+        Test case for horizontal win detection.
+        Simulates horizontal wins for a given player in each row.
         """
         self.assertFalse(check_winner(board=self.board, player=self.player, win=self.win))
 
@@ -59,6 +71,8 @@ class TestCheckEnd(unittest.TestCase):
 
     def test_vertical_only(self):
         """
+        Test case for vertical win detection.
+        Simulates vertical wins for a given player in each column.
         """
         self.assertFalse(check_winner(board=self.board, player=self.player, win=self.win))
 
@@ -89,6 +103,8 @@ class TestCheckEnd(unittest.TestCase):
 
     def test_diagonal_pos_only(self):
         """
+        Test case for positive diagonal win detection.
+        Simulates positive diagonal wins for a given player.
         """
         row_steps = self.row - self.win + 1
         col_steps = self.col - self.win + 1
@@ -102,6 +118,8 @@ class TestCheckEnd(unittest.TestCase):
 
     def test_diagonal_neg_only(self):
         """
+        Test case for negative diagonal win detection.
+        Simulates negative diagonal wins for a given player.
         """
         row_steps = self.row - self.win + 1
         col_steps = self.col - self.win + 1
@@ -115,6 +133,9 @@ class TestCheckEnd(unittest.TestCase):
 
     def test_full(self):
         """
+        Test case for a full board.
+        Verifies that the board is correctly marked as full when there are no empty spaces.
+        Also checks that the winner is identified correctly on a full board.
         """
         player = "X"
         self.board = [[player for _ in range(self.col)] for _ in range(self.row)]
@@ -144,6 +165,9 @@ class TestCheckEnd(unittest.TestCase):
 
     def test_random_states(self):
         """
+        Test case for various random board states.
+        Verifies that the functions check_winner and check_full behave correctly 
+        in different game states including both players potentially winning.
         """
         win = 3
         self.board = [

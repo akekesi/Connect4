@@ -1,13 +1,20 @@
 """
+Unit tests for the Connect4 game.
+This module tests the core functionality of the Connect4 game implementation,
+including the board initialization, valid moves, game rules, and winner detection.
+
+Run:
+$ python -m tests.test_connect4
 """
 
 import unittest
-
+from unittest.mock import patch
 from src.connect4.connect4 import Connect4
 
 
 class TestConnect4(unittest.TestCase):
     """
+    Unit tests for the Connect4 class.
     """
 
     def setUp(self) -> None:
@@ -24,14 +31,17 @@ class TestConnect4(unittest.TestCase):
 
     def test_initial_board(self):
         """
+        Test if the Connect4 board is correctly initialized to an empty state.
         """
-        expected_board = self.board = [[" " for _ in range(self.connect4.col)] for _ in range(self.connect4.row)]
+        expected_board = [[" " for _ in range(self.connect4.col)] for _ in range(self.connect4.row)]
         self.assertEqual(self.connect4.board, expected_board)
 
     def test_move(self):
         """
+        Test the functionality of making a move on the board.
+        Ensures moves are applied correctly for alternating players.
         """
-        expected_board = self.board = [[" " for _ in range(self.connect4.col)] for _ in range(self.connect4.row)]
+        expected_board = [[" " for _ in range(self.connect4.col)] for _ in range(self.connect4.row)]
         player = "X"
         for row in range(self.connect4.row - 1, -1, -1):
             for col in range(self.connect4.col):
@@ -43,8 +53,10 @@ class TestConnect4(unittest.TestCase):
 
     def test_remove(self):
         """
+        Test removing a move from the board.
+        Ensures that the board reverts to the state before the move was made.
         """
-        expected_board = self.board = [[" " for _ in range(self.connect4.col)] for _ in range(self.connect4.row)]
+        expected_board = [[" " for _ in range(self.connect4.col)] for _ in range(self.connect4.row)]
         player = "X"
         for row in range(self.connect4.row - 1, -1, -1):
             for col in range(self.connect4.col):
@@ -59,6 +71,7 @@ class TestConnect4(unittest.TestCase):
 
     def test_get_valid_moves(self):
         """
+        Test retrieving valid moves from the current board state.
         """
         valid_moves = self.connect4.get_valid_moves()
         expected_valid_moves = []
@@ -85,6 +98,7 @@ class TestConnect4(unittest.TestCase):
 
     def test_check_input(self):
         """
+        Test the validation of player input for move columns.
         """
         inputs_invalid = [
             "",
@@ -118,6 +132,7 @@ class TestConnect4(unittest.TestCase):
 
     def test_get_row(self):
         """
+        Test retrieving the correct row index for a given column.
         """
         # Test empty column:
         for col in range(self.connect4.col):
@@ -134,6 +149,7 @@ class TestConnect4(unittest.TestCase):
 
     def test_check_col(self):
         """
+        Test the validity of column indices.
         """
         cols_invalid = [
             -3, -2, -1,
@@ -149,6 +165,7 @@ class TestConnect4(unittest.TestCase):
 
     def test_check_row(self):
         """
+        Test the validity of row indices.
         """
         rows_invalid = [
             -3, -2, -1,
@@ -164,8 +181,9 @@ class TestConnect4(unittest.TestCase):
 
     def test_make_move_valid(self):
         """
+        Test making valid moves on the board.
         """
-        expected_board = self.board = [[" " for _ in range(self.connect4.col)] for _ in range(self.connect4.row)]
+        expected_board = [[" " for _ in range(self.connect4.col)] for _ in range(self.connect4.row)]
         player = "X"
         for row in range(self.connect4.row - 1, -1, -1):
             for col in range(self.connect4.col):
@@ -177,6 +195,7 @@ class TestConnect4(unittest.TestCase):
 
     def test_make_move_invalid(self):
         """
+        Test making invalid moves on the board.
         """
         invalid_cols = [
             -3, -2, -1,
@@ -185,7 +204,7 @@ class TestConnect4(unittest.TestCase):
             self.connect4.col + 2,
             self.connect4.col + 3,
         ]
-        expected_board = self.board = [[" " for _ in range(self.connect4.col)] for _ in range(self.connect4.row)]
+        expected_board = [[" " for _ in range(self.connect4.col)] for _ in range(self.connect4.row)]
         player = "X"
 
         # Test for invalid column:
@@ -195,12 +214,183 @@ class TestConnect4(unittest.TestCase):
             self.assertEqual(result, False)
 
         # Test for invalid row (column is fully filled):
-        expected_board = self.board = [["X" for _ in range(self.connect4.col)] for _ in range(self.connect4.row)]
-        self.connect4.board = self.board = [["X" for _ in range(self.connect4.col)] for _ in range(self.connect4.row)]
+        expected_board = [["X" for _ in range(self.connect4.col)] for _ in range(self.connect4.row)]
+        self.connect4.board = [["X" for _ in range(self.connect4.col)] for _ in range(self.connect4.row)]
         for col in range(self.connect4.col):
             result = self.connect4.make_move(player=player, col=col)
             self.assertEqual(self.connect4.board, expected_board)
             self.assertEqual(result, False)
+
+    def test_check_winner(self):
+        """
+        Test detecting a winning condition in the board.
+        """
+        self.connect4.board = [
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", "O", " ", " ", " ", " "],
+            ["O", "O", "X", "X", "X", "X", " "],
+        ]
+        self.assertTrue(self.connect4.check_winner(player="X"))
+        self.assertFalse(self.connect4.check_winner(player="O"))
+        self.assertFalse(self.connect4.check_full())
+
+        self.connect4.board = [
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", "O", " ", " ", " ", " ", " "],
+            [" ", "O", "X", " ", " ", " ", " "],
+            [" ", "O", "X", " ", " ", " ", " "],
+            ["O", "O", "X", "X", "X", " ", " "],
+        ]
+        self.assertFalse(self.connect4.check_winner(player="X"))
+        self.assertTrue(self.connect4.check_winner(player="O"))
+        self.assertFalse(self.connect4.check_full())
+
+        self.connect4.board = [
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", "X", " ", " ", " ", " ", " "],
+            [" ", "O", "X", " ", " ", " ", " "],
+            [" ", "O", "O", "X", " ", " ", " "],
+            [" ", "O", "X", "O", "X", "X", " "],
+        ]
+        self.assertTrue(self.connect4.check_winner(player="X"))
+        self.assertFalse(self.connect4.check_winner(player="O"))
+        self.assertFalse(self.connect4.check_full())
+
+        self.connect4.board = [
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", " ", " ", "O", " ", " "],
+            [" ", " ", " ", "O", "X", " ", " "],
+            [" ", " ", "O", "X", "X", " ", " "],
+            [" ", "O", "X", "O", "X", " ", " "],
+        ]
+        self.assertFalse(self.connect4.check_winner(player="X"))
+        self.assertTrue(self.connect4.check_winner(player="O"))
+        self.assertFalse(self.connect4.check_full())
+
+    def test_check_full(self):
+        """
+        Test detecting a full board condition.
+        """
+        self.connect4.board = [["X" for _ in range(self.connect4.col)] for _ in range(self.connect4.row)]
+        self.assertTrue(self.connect4.check_winner(player="X"))
+        self.assertFalse(self.connect4.check_winner(player="O"))
+        self.assertTrue(self.connect4.check_full())
+
+        self.connect4.board = [["O" for _ in range(self.connect4.col)] for _ in range(self.connect4.row)]
+        self.assertFalse(self.connect4.check_winner(player="X"))
+        self.assertTrue(self.connect4.check_winner(player="O"))
+        self.assertTrue(self.connect4.check_full())
+
+    def test_evaluate(self):
+        """
+        Test the evaluation functionality.
+        """
+        n = 6 * 7
+        self.connect4.board = [
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", "O", " ", " ", " ", " "],
+            ["O", "O", "X", "X", "X", "X", " "],
+        ]
+        self.assertTrue(self.connect4.check_winner(player="X"))
+        self.assertFalse(self.connect4.check_winner(player="O"))
+        self.assertFalse(self.connect4.check_full())
+        self.assertEqual(self.connect4.evaluate(), n)
+
+        self.connect4.board = [
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", "O", " ", " ", " ", " ", " "],
+            [" ", "O", "X", " ", " ", " ", " "],
+            [" ", "O", "X", " ", " ", " ", " "],
+            ["O", "O", "X", "X", "X", " ", " "],
+        ]
+        self.assertFalse(self.connect4.check_winner(player="X"))
+        self.assertTrue(self.connect4.check_winner(player="O"))
+        self.assertFalse(self.connect4.check_full())
+        self.assertEqual(self.connect4.evaluate(), -n)
+
+        self.connect4.board = [
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", "X", " ", " ", " ", " ", " "],
+            [" ", "O", "X", " ", " ", " ", " "],
+            [" ", "O", "O", "X", " ", " ", " "],
+            [" ", "O", "X", "O", "X", "X", " "],
+        ]
+        self.assertTrue(self.connect4.check_winner(player="X"))
+        self.assertFalse(self.connect4.check_winner(player="O"))
+        self.assertFalse(self.connect4.check_full())
+        self.assertEqual(self.connect4.evaluate(), n)
+
+        self.connect4.board = [
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", " ", " ", "O", " ", " "],
+            [" ", " ", " ", "O", "X", " ", " "],
+            [" ", " ", "O", "X", "X", " ", " "],
+            [" ", "O", "X", "O", "X", " ", " "],
+        ]
+        self.assertFalse(self.connect4.check_winner(player="X"))
+        self.assertTrue(self.connect4.check_winner(player="O"))
+        self.assertFalse(self.connect4.check_full())
+        self.assertEqual(self.connect4.evaluate(), -n)
+
+        self.connect4.board = [
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", " ", " ", " ", " ", " "],
+            [" ", " ", " ", " ", "O", " ", " "],
+            [" ", " ", " ", " ", "X", " ", " "],
+            [" ", " ", "O", "X", "X", " ", " "],
+            [" ", "O", "X", "O", "X", " ", " "],
+        ]
+        self.assertFalse(self.connect4.check_winner(player="X"))
+        self.assertFalse(self.connect4.check_winner(player="O"))
+        self.assertFalse(self.connect4.check_full())
+        self.assertEqual(self.connect4.evaluate(), 0)
+
+        self.connect4.board = [[" " for _ in range(self.connect4.col)] for _ in range(self.connect4.row)]
+        self.assertFalse(self.connect4.check_winner(player="X"))
+        self.assertFalse(self.connect4.check_winner(player="O"))
+        self.assertFalse(self.connect4.check_full())
+        self.assertEqual(self.connect4.evaluate(), 0)
+
+        self.connect4.board = [
+            ["X", "O", "X", "O", "X", "O", "X"],
+            ["X", "O", "X", "O", "X", "O", "X"],
+            ["O", "X", "O", "X", "O", "X", "O"],
+            ["X", "O", "X", "O", "X", "O", "X"],
+            ["X", "O", "X", "O", "X", "O", "X"],
+            ["X", "O", "X", "O", "X", "O", "X"],
+        ]
+        self.assertFalse(self.connect4.check_winner(player="X"))
+        self.assertFalse(self.connect4.check_winner(player="O"))
+        self.assertTrue(self.connect4.check_full())
+        self.assertEqual(self.connect4.evaluate(), 0)
+
+    @patch("builtins.input", side_effect=["x", "", "a"])
+    def test_get_input(self, mock_input):
+        """
+        Test the input validation logic.
+        """
+        message = "test_message"
+        answers = ["a", "b"]
+        message_error = "test_message_error"
+        answer = self.connect4.get_input(
+            message=message,
+            answers=answers,
+            message_error=message_error,
+        )
+        self.assertEqual(answer, "a")
+        self.assertEqual(mock_input.call_count, 3)
 
 
 if __name__ == "__main__":

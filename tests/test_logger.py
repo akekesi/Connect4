@@ -1,7 +1,8 @@
 """
 Module for testing logging functionality.
 
-Execute: python -m tests.test_logger
+Run:
+$ python -m tests.test_logger
 """
 
 # pylint: disable=unnecessary-comprehension
