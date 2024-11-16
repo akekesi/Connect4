@@ -1,4 +1,4 @@
-# Connect4
+# Connect4 🔴🟡
 <div align="center">
 
    [![Status](https://img.shields.io/badge/Status-in_progress-yellow.svg)](https://github.com/akekesi/connect4?tab=readme-ov-file#description)
@@ -22,6 +22,7 @@
 1. [Demo](#demo)
 1. [Prerequisites](#prerequisites)
 1. [Python Environment Setup](#python-environment-setup)
+1. [TicTacToe User Guide](#tictactoe-user-guide)
 1. [Connect4 User Guide](#connect4-user-guide)
 1. [To-Do](#to-do)
 1. [Authors](#authors)
@@ -105,12 +106,19 @@ $ python -m coverage html
 View the HTML coverage report at: `htmlcov/index.html`
 
 ## TicTacToe User Guide
-### 1. Running TicTacToe
+### 1. Rules of TicTacToe
+[TicTacToe](https://en.wikipedia.org/wiki/Tic-tac-toe)
+
+### 2. Running TicTacToe
 ```
 $ python -m src.ticktackoe
 ```
+
 ## Connect4 User Guide
-### 1. Running Connect4
+### 1. Rules of Connect4
+[Connect4](https://en.wikipedia.org/wiki/Connect_Four)
+
+### 2. Running Connect4
 ```
 $ python -m src.connect4
 ```
