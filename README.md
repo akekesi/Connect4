@@ -22,7 +22,6 @@
 1. [Demo](#demo)
 1. [Prerequisites](#prerequisites)
 1. [Python Environment Setup](#python-environment-setup)
-1. [Build and Run Executable](#build-and-run-executable)
 1. [Connect4 User Guide](#connect4-user-guide)
 1. [To-Do](#to-do)
 1. [Authors](#authors)
@@ -74,8 +73,7 @@ $ pip install -r requirements_dev.txt
 ### 2. Running TikTakToe
 TikTacToe demonstrates the use of minimax in a simplified setting, offering a practical example of how the algorithm can be applied to solve game-based problems.
 ```
-$ python -m src.ticktackoe          # using Minimax as external class
-$ python -m src.ticktackoe_minimax  # using Minimax as internal method
+$ python -m src.ticktackoe
 ```
 
 ### 3. Running Connect4
@@ -106,22 +104,16 @@ $ python -m coverage html
 ```
 View the HTML coverage report at: `htmlcov/index.html`
 
-## Build and Run Executable
-### 1. Build an executable using shell script
+## TicTacToe User Guide
+### 1. Running TicTacToe
 ```
-$ . create_exe.sh <arg1>
+$ python -m src.ticktackoe
 ```
-   - `<arg1>`: Suffix for naming the virtual environment (optional).  
-   Examples:
-   ```
-   $ . create_exe.sh              # Creates /exe/connect4/connect4.exe
-   $ . create_exe.sh test         # creates /exe/connect4_test/connect4_test.exe
-   ```
-
-### 2. Run the executable
-Run **Connect4** by double-clicking the `connect4.exe` file located in the `/exe/connect4` directory.
-
 ## Connect4 User Guide
+### 1. Running Connect4
+```
+$ python -m src.connect4
+```
 
 ## To-Do
 ### Notation
@@ -131,6 +123,9 @@ Run **Connect4** by double-clicking the `connect4.exe` file located in the `/exe
 
 ### To-Do
 - [ ] Using [GitHub Issues](https://github.com/akekesi/Connect4/issues) insted of this To-Do list 😎
+- [ ] Finish User Guide
+- [ ] Make unit test for minimax.py
+- [ ] MAke unit test for tictactoe.py
 - [x] ~~Add logging~~
 - [ ] Add version
 - [ ] Add setup.py, .toml
