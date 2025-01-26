@@ -15,7 +15,7 @@ class TicTacToe:
         for i in range(3):
             print(" | ".join(self.board[i * 3:(i + 1) * 3]))
             if i < 2:
-                print("-" * 5)
+                print("-" * 9)
         print("\n")
 
     def is_valid_move(self, move: int) -> bool:
@@ -85,15 +85,15 @@ class Node:
         """
         return len(self.children) == len(self.state.get_valid_moves())
 
-    def best_child(self, exploration_weight: int = 1.4) -> "Node": # TODO: ??? why "Node" and not just Node ???
+    def best_child(self, exploration_weight: float = 1.4) -> "Node": # TODO: ??? why "Node" and not just Node ???
         """
         Selects the child node with the best balance of exploration and exploitation, 
         using the UCT/UCB1 formula.
         """
         return max(
             self.children,
-            key=lambda child: (child.wins / (child.visits)) +
-                              exploration_weight * sqrt(log(self.visits) / (child.visits))
+            key=lambda child: (child.wins / child.visits) +
+                              exploration_weight * sqrt(log(self.visits) / child.visits)
         )
 
 
@@ -107,26 +107,52 @@ class MCTS:
         for a given number of iterations.
         Returns the best child node after the iterations.
         """
+        player1 = root.state.current_player
+        player2 = "O" if player1 == "X" else "X"
         for _ in range(self.iterations):
             node = self._select(node=root)
             # TODO-print:
+            # print(f"{player1 = }")
             # node.state.display_board()
-            reward = self._simulate(state=node.state)
+            # print(f"{node.state.current_player = }")
+            reward = self._simulate(state=node.state, player1=player1, player2=player2)
             # TODO-print:
             # print(f"{reward = }")
             self._backpropagate(node=node, reward=reward)
-        return root.best_child(exploration_weight=0.0) # TODO: ??? exploration_weight=0.0 ???
+        # TODO-print:
+        for node in root.children:
+            node.state.display_board()
+            print(f"{node.wins = }")
+            print(f"{node.visits = }")
+        return root.best_child(exploration_weight=0.0) # TODO-?: Is exploration_weight=0.0?
+        # return root.best_child() # TODO-?: Is exploration_weight=1.4?
 
+    # TODO-?: Which _selection is correct?
+    # traverses the tree from the root
+    # def _select(self, node: Node) -> Node:
+    #     """
+    #     Traverses the tree from the root, choosing the best child (based on UCT, UCB1), 
+    #     until reaching an unexpanded node or a terminal state.
+    #     """
+    #     while not node.state.is_game_over():
+    #         if not node.is_fully_expanded():
+    #             return self._expand(node=node)
+    #         else:
+    #             node = node.best_child()
+    #     return node
+
+    # TODO-?: Which _selection is correct?
+    # traverses the children of the root (not the tree)
     def _select(self, node: Node) -> Node:
         """
-        Traverses the tree from the root, choosing the best child (based on UCT, UCB1), 
+        Traverses the children of the root, choosing the best child (based on UCT, UCB1), 
         until reaching an unexpanded node or a terminal state.
         """
-        while not node.state.is_game_over():
+        if not node.state.is_game_over():
             if not node.is_fully_expanded():
-                return self._expand(node=node)
+                node = self._expand(node=node)
             else:
-                node = node.best_child() # TODO: ??? exploration_weight=1.4 ???
+                node = node.best_child() # TODO-?: Is exploration_weight=1.4?
         return node
 
     def _expand(self, node: Node) -> Node: # TODO: Node or RuntimeError
@@ -141,26 +167,32 @@ class MCTS:
                 child_node = Node(state=new_state, parent=node)
                 node.children.append(child_node)
                 return child_node
-        raise RuntimeError("No valid moves to expand.")
 
-    def _simulate(self, state: Node) -> int:
+    def _simulate(self, state: Node, player1: str, player2: str) -> int:
         """
         Simulates a random playthrough from the current state until the game ends.
         Assigns a reward:
-            +1 if "X" wins
-            -1 if "O" wins
+            +1 if ??? wins
+            -1 if ??? wins
             0 for a draw.
         """
         current_state = self._clone_state(state=state)
+        # TODO-print:
+        # print(f"{state.current_player = }")
         while not current_state.is_game_over():
+            # TODO-print:
+            # current_state.display_board()
+            # print(f"{current_state.current_player = }")
             move = random.choice(current_state.get_valid_moves())
             current_state.make_move(move=move)
         # TODO-print:
         # current_state.display_board()
-        if current_state.is_winner(player="X"):
+        if current_state.is_winner(player=player1):
             return 1
-        elif current_state.is_winner(player="O"):
+            # return 1 + len([tile for tile in current_state.board if tile == " "])
+        elif current_state.is_winner(player=player2):
             return -1
+            # return -1 - len([tile for tile in current_state.board if tile == " "])
         else:
             return 0
 
@@ -172,7 +204,7 @@ class MCTS:
         while node is not None:
             node.visits += 1
             node.wins += reward
-            reward = -reward  # Alternate between players
+            reward = -reward
             node = node.parent
 
     def _get_next_state(self, state: Node, move: int) -> Node:
@@ -198,6 +230,18 @@ class MCTS:
 if __name__ == "__main__":
     game = TicTacToe()
     mcts = MCTS(iterations=1000)
+
+    # initial state
+    # game.board = [
+    #     " ", "X", "X",
+    #     "O", "O", " ",
+    #     " ", " ", " "
+    # ]
+    # game.board = [
+    #     "X", " ", "X",
+    #     " ", " ", " ",
+    #     "O", "O", " "
+    # ]
 
     while not game.is_game_over():
         game.display_board()
