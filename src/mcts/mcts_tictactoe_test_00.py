@@ -1,11 +1,12 @@
 import random
 from math import sqrt, log
+from src.utils.players import Players
 
 
 class TicTacToe:
     def __init__(self):
         self.board = [" "] * 9
-        self.current_player = "X"
+        self.current_player = Players.P1.value
 
     def display_board(self) -> None:
         """
@@ -30,7 +31,7 @@ class TicTacToe:
         """
         if self.is_valid_move(move):
             self.board[move] = self.current_player
-            self.current_player = "O" if self.current_player == "X" else "X"
+            self.current_player = Players.P2.value if self.current_player == Players.P1.value else Players.P1.value
             return True
         return False
 
@@ -39,7 +40,7 @@ class TicTacToe:
         Reverts a move and switches back to the previous player.
         """
         self.board[move] = " "
-        self.current_player = "O" if self.current_player == "X" else "X"
+        self.current_player = Players.P2.value if self.current_player == Players.P1.value else Players.P1.value
 
     def is_winner(self, player: str) -> bool:
         """
@@ -68,7 +69,7 @@ class TicTacToe:
         """
         Checks if the game has ended due to a win or a draw.
         """
-        return self.is_winner("X") or self.is_winner("O") or self.is_draw()
+        return self.is_winner(Players.P1.value) or self.is_winner(Players.P2.value) or self.is_draw()
 
 
 class Node:
@@ -108,7 +109,7 @@ class MCTS:
         Returns the best child node after the iterations.
         """
         player1 = root.state.current_player
-        player2 = "O" if player1 == "X" else "X"
+        player2 = Players.P2.value if player1 == Players.P1.value else Players.P1.value
         for _ in range(self.iterations):
             node = self._select(node=root)
             # TODO-print:
@@ -245,8 +246,8 @@ if __name__ == "__main__":
 
     while not game.is_game_over():
         game.display_board()
-        if game.current_player == "X": # User will start the game
-        # if game.current_player == "O": # AI will start the game
+        if game.current_player == Players.P1.value: # User will start the game
+        # if game.current_player == Players.P2.value: # AI will start the game
             move = int(input("Your turn (0-8): "))
             while not game.is_valid_move(move=move):
                 move = int(input("Invalid move. Try again."))
@@ -261,9 +262,9 @@ if __name__ == "__main__":
             game.make_move(move=best_move)
 
     game.display_board()
-    if game.is_winner(player="X"):
-        print("You win!")
-    elif game.is_winner(player="O"):
-        print("AI wins!")
+    if game.is_winner(player=Players.P1.value):
+        print(f"{Players.P1.value} win!")
+    elif game.is_winner(player=Players.P2.value):
+        print(f"{Players.P2.value} wins!")
     else:
         print("It's a draw!")
