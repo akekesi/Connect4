@@ -1,3 +1,4 @@
+import copy
 import random
 from math import sqrt, log
 from src.utils.players import Players
@@ -99,8 +100,9 @@ class Node:
 
 
 class MCTS:
-    def __init__(self, iterations: int = 1000) -> None:
+    def __init__(self, game_constructor, iterations: int = 1000) -> None:
         self.iterations = iterations
+        self.game_constructor = game_constructor
 
     def search(self, root: Node) -> Node:
         """
@@ -222,15 +224,15 @@ class MCTS:
         Creates a deep copy of the game state 
         to ensure modifications do not affect the original.
         """
-        new_state = TicTacToe()
-        new_state.board = state.board[:]
+        new_state = self.game_constructor()
+        new_state.board = copy.deepcopy(state.board)
         new_state.current_player = state.current_player
         return new_state
 
 
 if __name__ == "__main__":
     game = TicTacToe()
-    mcts = MCTS(iterations=1000)
+    mcts = MCTS(game_constructor=TicTacToe, iterations=1000)
 
     # initial state
     # game.board = [
@@ -242,6 +244,13 @@ if __name__ == "__main__":
     #     "X", " ", "X",
     #     " ", " ", " ",
     #     "O", "O", " "
+    # ]
+
+    # _select flat can not solve this case
+    # game.board = [
+    #     " ", " ", " ",
+    #     "O", "O", " ",
+    #     "X", " ", " "
     # ]
 
     while not game.is_game_over():
