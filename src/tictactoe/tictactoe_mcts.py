@@ -123,6 +123,7 @@ class TicTacToe:
         """
         return self.is_winner(Players.P1.value) or self.is_winner(Players.P2.value) or self.is_draw()
 
+
 if __name__ == "__main__":
     game = TicTacToe()
     mcts = MCTS(game_constructor=TicTacToe, iterations=1000)
