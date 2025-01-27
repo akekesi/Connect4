@@ -6,7 +6,7 @@ for initializing the game, making moves, checking for a winner, and playing agai
 an AI agent with different difficulty levels.
 
 Run:
-$ python -m src.connect4.connect4
+$ python -m src.connect4.connect4_mcts
 """
 
 from src.utils.players import Players

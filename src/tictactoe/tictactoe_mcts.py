@@ -6,7 +6,7 @@ move recommendations based on the MCTS algorithm. Both players, receive
 suggested moves for optimal gameplay, though they can choose their own moves as well.
 
 Run:
-$ python -m src.tictactoe.tictactoe
+$ python -m src.tictactoe.tictactoe_mcts
 """
 
 from src.utils.players import Players
