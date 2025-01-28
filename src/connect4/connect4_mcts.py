@@ -2,15 +2,10 @@
 Connect4 Game Module
 
 This module provides the implementation of the Connect4 game, including functionalities 
-for initializing the game, making moves, checking for a winner, and playing against 
-an AI agent with different difficulty levels.
-
-Run:
-$ python -m src.connect4.connect4_mcts
+for initializing the game, making moves, checking for a winner.
 """
 
 from src.utils.players import Players
-from src.mcts.mcts_tictactoe_test_00 import MCTS, Node
 from src.utils.check_end import check_winner, check_full
 
 
@@ -23,6 +18,7 @@ class Connect4:
         col (int): Number of columns in the board.
         win (int): Number of consecutive tokens needed to win.
         board (list): 2D list representing the game board.
+        current_player (str): The current player's symbol (X or O).
     """
 
     def __init__(self) -> None:
@@ -174,34 +170,3 @@ class Connect4:
         """
         valid = 0 <= row < self.row
         return valid
-
-
-if __name__ == "__main__":
-    game = Connect4()
-    mcts = MCTS(game_constructor=Connect4, iterations=1000)
-
-    while not game.is_game_over():
-        game.display_board()
-        if game.current_player == Players.P1.value: # User will start the game
-        # if game.current_player == Players.P2.value: # AI will start the game
-            move = int(input("Enter move (col): "))
-            while not game.is_valid_move(move=move):
-                move = int(input("Invalid move. Try again."))
-            game.make_move(move=move)
-        else:
-            print("AI is thinking...")
-            root = Node(game)
-            board_best_move = mcts.search(root=root).state
-            list1 = game.board
-            list2 = board_best_move.board
-            best_move_y = [index for index, (element1, element2) in enumerate(zip(list1, list2)) if element1 != element2][0]
-            best_move_x = [index for index, (element1, element2) in enumerate(zip(list1[best_move_y], list2[best_move_y])) if element1 != element2][0]
-            game.make_move(move=best_move_x)
-
-    game.display_board()
-    if game.is_winner(player=Players.P1.value):
-        print(f"{Players.P1.value} win!")
-    elif game.is_winner(player=Players.P2.value):
-        print(f"{Players.P2.value} wins!")
-    else:
-        print("It's a draw!")

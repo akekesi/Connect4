@@ -1,30 +1,24 @@
 """
-Two-Player Tic-Tac-Toe Game with MCTS Move Recommendations
+Two-Player Tic-Tac-Toe Game
 
-This module provides a command-line Tic-Tac-Toe game for two players, with real-time
-move recommendations based on the MCTS algorithm. Both players, receive
-suggested moves for optimal gameplay, though they can choose their own moves as well.
-
-Run:
-$ python -m src.tictactoe.tictactoe_mcts
+This module provides a command-line Tic-Tac-Toe game for two players.
 """
 
 from src.utils.players import Players
-from src.mcts.mcts_tictactoe_test_00 import MCTS, Node
 
 
 class TicTacToe:
     """
-    A Tic-Tac-Toe game with two-player functionality and MCTS-based move recommendations.
+    A Tic-Tac-Toe game with two-player functionality.
 
-    This class represents a Tic-Tac-Toe game board and includes methods for playing the game
-    interactively between two players. The class offers move validation, win detection,
-    and real-time optimal move suggestions using the MCTS algorithm.
+    This class represents a Tic-Tac-Toe game board.
+    The class offers move validation, win detection.
 
     Attributes:
     n (int): The size of the Tic-Tac-Toe board (3x3).
     board (list[list[int]]): A 2D list representing the Tic-Tac-Toe board, 
                              initially empty with each cell set to a space (" ").
+    current_player (str): The current player's symbol (X or O).
     """
 
     def __init__(self) -> None:
@@ -122,48 +116,3 @@ class TicTacToe:
             bool: True if the game is over, False otherwise.
         """
         return self.is_winner(Players.P1.value) or self.is_winner(Players.P2.value) or self.is_draw()
-
-
-if __name__ == "__main__":
-    game = TicTacToe()
-    mcts = MCTS(game_constructor=TicTacToe, iterations=1000)
-
-    # initial state
-    # game.board = [
-    #     [" ", "X", "X",],
-    #     ["O", "O", " ",],
-    #     [" ", " ", " ",],
-    # ]
-    # game.board = [
-    #     ["X", " ", "X",],
-    #     [" ", " ", " ",],
-    #     ["O", "O", " ",],
-    # ]
-
-    while not game.is_game_over():
-        game.display_board()
-        if game.current_player == Players.P1.value: # User will start the game
-        # if game.current_player == Players.P2.value: # AI will start the game
-            input_ = input("Enter move (row, col): ")
-            x, y = map(int, input_.split())
-            move = (x, y)
-            while not game.is_valid_move(move=move):
-                move = int(input("Invalid move. Try again."))
-            game.make_move(move=move)
-        else:
-            print("AI is thinking...")
-            root = Node(game)
-            board_best_move = mcts.search(root=root).state
-            list1 = game.board
-            list2 = board_best_move.board
-            best_move_y = [index for index, (element1, element2) in enumerate(zip(list1, list2)) if element1 != element2][0]
-            best_move_x = [index for index, (element1, element2) in enumerate(zip(list1[best_move_y], list2[best_move_y])) if element1 != element2][0]
-            game.make_move(move=(best_move_y, best_move_x))
-
-    game.display_board()
-    if game.is_winner(player=Players.P1.value):
-        print(f"{Players.P1.value} win!")
-    elif game.is_winner(player=Players.P2.value):
-        print(f"{Players.P2.value} wins!")
-    else:
-        print("It's a draw!")
