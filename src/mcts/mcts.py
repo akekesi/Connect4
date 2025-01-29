@@ -30,11 +30,11 @@ class Node:
 
 
 class MCTS:
-    def __init__(self, game_constructor, player1: str, player2: str, iterations: int = 1000) -> None:
+    def __init__(self, game_constructor, player_1: str, player_2: str, iterations: int = 1000) -> None:
         self.iterations = iterations
         self.game_constructor = game_constructor
-        self.player1 = player1
-        self.player2 = player2
+        self.player_1 = player_1
+        self.player_2 = player_2
 
     def search(self, root: Node) -> Node:
         """
@@ -42,15 +42,12 @@ class MCTS:
         for a given number of iterations.
         Returns the best child node after the iterations.
         """
-        player1 = root.state.current_player
-        player2 = self.player2 if player1 == self.player1 else self.player1
         for _ in range(self.iterations):
             node = self._select(node=root)
             # TODO-print:
-            # print(f"{player1 = }")
             # node.state.display_board()
-            # print(f"{node.state.current_player = }")
-            reward = self._simulate(state=node.state, player1=player1, player2=player2)
+            # print(f"{node.state.player = }")
+            reward = self._simulate(state=node.state)
             # TODO-print:
             # print(f"{reward = }")
             self._backpropagate(node=node, reward=reward)
@@ -66,30 +63,19 @@ class MCTS:
         pos_x = [index for index, (element1, element2) in enumerate(zip(list1[pos_y], list2[pos_y])) if element1 != element2][0]
         return (pos_y, pos_x)
 
-    # TODO-?: Which _select is correct?
     # traverses the tree from the root
-    # def _select(self, node: Node) -> Node:
-    #     """
-    #     Traverses the tree from the root, choosing the best child (based on UCT, UCB1), 
-    #     until reaching an unexpanded node or a terminal state.
-    #     """
-    #     while not node.state.is_game_over():
-    #         if not node.is_fully_expanded():
-    #             return self._expand(node=node)
-    #         else:
-    #             node = node.best_child()
-    #     return node
-
-    # TODO-?: Which _select is correct?
-    # traverses the children of the root (not the tree)
     def _select(self, node: Node) -> Node:
         """
-        Traverses the children of the root, choosing the best child (based on UCT, UCB1), 
+        Traverses the tree from the root, choosing the best child (based on UCT, UCB1), 
         until reaching an unexpanded node or a terminal state.
         """
-        if not node.state.is_game_over():
+        while not node.state.is_game_over():
+            # TODO-print:
+            # n_empty = len([x for row in node.state.board for x in row if x == " "])
+            # if n_empty < 40:
+            #     print(f"{n_empty = }")
             if not node.is_fully_expanded():
-                node = self._expand(node=node)
+                return self._expand(node=node)
             else:
                 node = node.best_child()
         return node
@@ -101,13 +87,13 @@ class MCTS:
         """
         moves = node.state.get_valid_moves()
         for move in moves:
-            new_state = self._get_next_state(state=node.state, move=move)
-            if not any(child.state.board == new_state.board for child in node.children):
-                child_node = Node(state=new_state, parent=node)
-                node.children.append(child_node)
-                return child_node
+            state_new = self._get_next_state(state=node.state, move=move)
+            if not any(child.state.board == state_new.board for child in node.children):
+                node_child = Node(state=state_new, parent=node)
+                node.children.append(node_child)
+                return node_child
 
-    def _simulate(self, state: Node, player1: str, player2: str) -> int:
+    def _simulate(self, state: Node) -> int:
         """
         Simulates a random playthrough from the current state until the game ends.
         Assigns a reward:
@@ -115,23 +101,21 @@ class MCTS:
             -1 if ??? wins
             0 for a draw.
         """
-        current_state = self._clone_state(state=state)
+        state_cloned = self._clone_state(state=state)
+        player_rewarded = self.player_1 if state_cloned.player == self.player_2 else self.player_2 # player wo made the last step to get current state
+
         # TODO-print:
-        # print(f"{state.current_player = }")
-        while not current_state.is_game_over():
-            # TODO-print:
-            # current_state.display_board()
-            # print(f"{current_state.current_player = }")
-            move = random.choice(current_state.get_valid_moves())
-            current_state.make_move(move=move)
+        # print(f"{state_cloned.player = }")
+        # print(f"{player_rewarded = }")
+        while not state_cloned.is_game_over():
+            move = random.choice(state_cloned.get_valid_moves())
+            state_cloned.make_move(move=move)
         # TODO-print:
         # current_state.display_board()
-        if current_state.is_winner(player=player1):
+        if state_cloned.is_winner(player=player_rewarded):
             return 1
-            # return 1 + len([tile for tile in current_state.board if tile == " "])
-        elif current_state.is_winner(player=player2):
+        elif state_cloned.is_winner(player=state_cloned.player):
             return -1
-            # return -1 - len([tile for tile in current_state.board if tile == " "])
         else:
             return 0
 
@@ -151,16 +135,16 @@ class MCTS:
         Creates a copy of the current state and 
         applies a move to generate a new state.
         """
-        new_state = self._clone_state(state=state)
-        new_state.make_move(move=move)
-        return new_state
+        state_new = self._clone_state(state=state)
+        state_new.make_move(move=move)
+        return state_new
 
     def _clone_state(self, state: Node) -> Node:
         """
         Creates a deep copy of the game state 
         to ensure modifications do not affect the original.
         """
-        new_state = self.game_constructor()
-        new_state.board = copy.deepcopy(state.board)
-        new_state.current_player = state.current_player
-        return new_state
+        state_new = self.game_constructor()
+        state_new.board = copy.deepcopy(state.board)
+        state_new.player = state.player
+        return state_new

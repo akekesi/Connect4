@@ -18,7 +18,7 @@ class Connect4:
         col (int): Number of columns in the board.
         win (int): Number of consecutive tokens needed to win.
         board (list): 2D list representing the game board.
-        current_player (str): The current player's symbol (X or O).
+        player (str): The symbol of player, who makes a move next.
     """
 
     def __init__(self) -> None:
@@ -29,7 +29,7 @@ class Connect4:
         self.col = 7
         self.win = 4
         self.board = None
-        self.current_player = Players.P1.value
+        self.player = Players.P1.value
         self.init_board()
 
     def init_board(self) -> None:
@@ -83,8 +83,8 @@ class Connect4:
             move (tuple[int, int]): The row and column indices for the move.
         """
         row = self.get_row(col=move)
-        self.board[row][move] = self.current_player
-        self.current_player = Players.P2.value if self.current_player == Players.P1.value else Players.P1.value
+        self.board[row][move] = self.player
+        self.player = Players.P2.value if self.player == Players.P1.value else Players.P1.value
 
     def undo_move(self, move: tuple[int, int]) -> None:
         """
@@ -94,7 +94,7 @@ class Connect4:
             move (tuple[int, int]): The row and column indices to remove the token from.
         """
         self.board[move[0]][move[1]] = " "
-        self.current_player = Players.P2.value if self.current_player == Players.P1.value else Players.P1.value
+        self.player = Players.P2.value if self.player == Players.P1.value else Players.P1.value
 
     def is_winner(self, player: str) -> bool:
         """

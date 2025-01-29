@@ -18,7 +18,7 @@ class TicTacToe:
     n (int): The size of the Tic-Tac-Toe board (3x3).
     board (list[list[int]]): A 2D list representing the Tic-Tac-Toe board, 
                              initially empty with each cell set to a space (" ").
-    current_player (str): The current player's symbol (X or O).
+    player (str): The symbol of player who makes a move next.
     """
 
     def __init__(self) -> None:
@@ -27,7 +27,7 @@ class TicTacToe:
         """
         self.n = 3
         self.board = [[" " for _ in range(self.n)] for _ in range(self.n)]
-        self.current_player = Players.P1.value
+        self.player = Players.P1.value
 
     def display_board(self) -> None:
         """
@@ -60,8 +60,8 @@ class TicTacToe:
         Args:
             move (tuple[int, int]): The (row, col) position on the board.
         """
-        self.board[move[0]][move[1]] = self.current_player
-        self.current_player = Players.P2.value if self.current_player == Players.P1.value else Players.P1.value
+        self.board[move[0]][move[1]] = self.player
+        self.player = Players.P2.value if self.player == Players.P1.value else Players.P1.value
 
     def undo_move(self, move: tuple[int, int]) -> None:
         """
@@ -71,7 +71,7 @@ class TicTacToe:
             move (tuple[int, int]): The (row, col) position to be cleared.
         """
         self.board[move[0]][move[1]] = " "
-        self.current_player = Players.P2.value if self.current_player == Players.P1.value else Players.P1.value
+        self.player = Players.P2.value if self.player == Players.P1.value else Players.P1.value
 
     def is_winner(self, player: str) -> bool:
         """

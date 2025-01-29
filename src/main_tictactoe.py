@@ -7,15 +7,15 @@ if __name__ == "__main__":
     game = TicTacToe()
     mcts = MCTS(
         game_constructor=TicTacToe,
-        player1=Players.P1.value,
-        player2=Players.P2.value,
+        player_1=Players.P1.value,
+        player_2=Players.P2.value,
         iterations=1000
     )
 
     while not game.is_game_over():
         game.display_board()
-        if game.current_player == Players.P1.value: # User will start the game
-        # if game.current_player == Players.P2.value: # AI will start the game
+        if game.player == Players.P1.value: # User will start the game
+        # if game.player == Players.P2.value: # AI will start the game
             move = tuple(map(int, input("Enter move (row, col): ").split()))
             while not game.is_valid_move(move=move):
                 move = int(input("Invalid move. Try again."))
