@@ -65,10 +65,10 @@ class MCTS:
         iterations: The number of iterations to run the MCTS algorithm. Default is 1000.
 
     Attributes:
-        iterations: The number of iterations to run the MCTS algorithm.
         game_constructor: A function that returns a new game state.
         player_1: The player that starts the game.
         player_2: The player that follows.
+        iterations: The number of iterations to run the MCTS algorithm.
 
     Methods:
         search(root: Node) -> Node: Repeats the MCTS process (selection, expansion, simulation, backpropagation) 
@@ -89,10 +89,10 @@ class MCTS:
     """
 
     def __init__(self, game_constructor, player_1: str, player_2: str, iterations: int = 1000) -> None:
-        self.iterations = iterations
         self.game_constructor = game_constructor
         self.player_1 = player_1
         self.player_2 = player_2
+        self.iterations = iterations
 
     def search(self, root: Node) -> Node:
         """
