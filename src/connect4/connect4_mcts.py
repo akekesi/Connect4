@@ -19,6 +19,19 @@ class Connect4:
         win (int): Number of consecutive tokens needed to win.
         board (list): 2D list representing the game board.
         player (str): The symbol of player, who makes a move next.
+    
+    Methods:
+        init_board: Resets the game board to its initial state.
+        display_board: Displays the current state of the board.
+        make_move: Makes a move on the board by placing the player's token in the specified column.
+        get_valid_moves: Gets all valid moves (empty cells) on the board.
+        get_row: Finds the lowest available row in a column.
+        is_valid_move: Checks if a move is valid.
+        is_winner: Checks if the specified player has won the game.
+        is_draw: Checks if the board is full.
+        is_game_over: Checks if the game has ended due to a win or a draw.
+        check_row: Checks if a row index is valid.
+        check_col: Checks if a column index is valid.
     """
 
     def __init__(self) -> None:
@@ -67,34 +80,61 @@ class Connect4:
         print(f"|{f'{turn:03}':=^{n}}|")
         print()
 
-    def is_valid_move(self, move: int) -> bool:
-        """
-        Checks if a move is valid by verifying that the cell is empty.
-        """
-        row = self.get_row(col=move)
-        return 0 <= move < self.col and \
-               self.board[row][move] == " "
-
     def make_move(self, move: int) -> None:
         """
-        Places a player's token on the board.
+        Makes a move on the board by placing the player's token in the specified column.
 
         Args:
-            move (tuple[int, int]): The row and column indices for the move.
+            move (int): The column index to place the token in.
         """
         row = self.get_row(col=move)
         self.board[row][move] = self.player
         self.player = Players.P2.value if self.player == Players.P1.value else Players.P1.value
 
-    def undo_move(self, move: tuple[int, int]) -> None:
+    def get_valid_moves(self) -> list[int]:
         """
-        Removes a player's token from the board.
+        Gets all valid moves (empty cells) on the board.
+
+        Returns:
+            list[int]: List of valid moves.
+        """
+        valid_moves = []
+        for col in range(self.col):
+            row = self.get_row(col=col)
+            if self.check_row(row=row):
+                valid_moves.append(col)
+        return valid_moves
+
+    def get_row(self, col: int) -> int:
+        """
+        Finds the lowest available row in a column.
 
         Args:
-            move (tuple[int, int]): The row and column indices to remove the token from.
+            col (int): The column index.
+
+        Returns:
+            int: The row index of the lowest available cell, or -1 if the column is full.
         """
-        self.board[move[0]][move[1]] = " "
-        self.player = Players.P2.value if self.player == Players.P1.value else Players.P1.value
+        row_free = -1
+        for row in range(self.row):
+            if self.board[row][col] == " ":
+                row_free = row
+            else:
+                break
+        return row_free
+
+    def is_valid_move(self, move: int) -> bool:
+        """
+        Checks if a move is valid by verifying that at least one cell is empty in the column.
+        """
+        if not self.check_col(col=move):
+            return False
+
+        row = self.get_row(col=move)
+        if not self.check_row(row=row):
+            return False
+
+        return self.board[row][move] == " "
 
     def is_winner(self, player: str) -> bool:
         """
@@ -117,20 +157,6 @@ class Connect4:
         """
         return check_full(board=self.board)
 
-    def get_valid_moves(self) -> list[tuple[int, int]]:
-        """
-        Gets all valid moves (empty cells) on the board.
-
-        Returns:
-            list[tuple[int, int]]: List of tuples representing valid moves.
-        """
-        valid_moves = []
-        for col in range(self.col):
-            row = self.get_row(col=col)
-            if self.check_row(row=row):
-                valid_moves.append(col)
-        return valid_moves
-
     def is_game_over(self) -> bool:
         """
         Checks if the game has ended due to a win or a draw.
@@ -138,25 +164,9 @@ class Connect4:
         Returns:
             bool: True if the game is over, False otherwise.
         """
-        return self.is_winner(Players.P1.value) or self.is_winner(Players.P2.value) or self.is_draw()
-
-    def get_row(self, col: int) -> int:
-        """
-        Finds the lowest available row in a column.
-
-        Args:
-            col (int): The column index.
-
-        Returns:
-            int: The row index of the lowest available cell, or -1 if the column is full.
-        """
-        row_free = -1
-        for row in range(self.row):
-            if self.board[row][col] == " ":
-                row_free = row
-            else:
-                break
-        return row_free
+        return self.is_winner(Players.P1.value) or \
+               self.is_winner(Players.P2.value) or \
+               self.is_draw()
 
     def check_row(self, row: int) -> bool:
         """
@@ -168,5 +178,16 @@ class Connect4:
         Returns:
             bool: True if the row is valid, False otherwise.
         """
-        valid = 0 <= row < self.row
-        return valid
+        return 0 <= row < self.row
+
+    def check_col(self, col: int) -> bool:
+        """
+        Checks if a column index is valid.
+
+        Args:
+            col (int): The column index to check.
+
+        Returns:
+            bool: True if the column is valid, False otherwise.
+        """
+        return 0 <= col < self.col
