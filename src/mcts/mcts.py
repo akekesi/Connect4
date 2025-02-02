@@ -1,9 +1,33 @@
+"""
+Monte Carlo Tree Search (MCTS) algorithm.
+A decision-making algorithm that selects the best move in a game by simulating multiple random playthroughs.
+"""
+
 import copy
 import random
 from math import sqrt, log
 
 
 class Node:
+    """
+    A node in the Monte Carlo Tree Search (MCTS) tree.
+    Contains a game state, a reference to the parent node, a list of child nodes, and statistics for the node.
+
+    Parameters:
+        state: The game state represented by the node.
+        parent: The parent node of the current node. Default is None.
+
+    Attributes:
+        state: The game state represented by the node.
+        parent: The parent node of the current node.
+        children: A list of child nodes of the current node.
+        visits: The number of times the node has been visited.
+        wins: The number of wins from the node.
+
+    Methods:
+        is_fully_expanded() -> bool: Returns True if all valid moves from this state have been expanded as child nodes.
+        best_child(exploration_weight: float = 1.4) -> "Node": Selects the child node with the best balance of exploration and exploitation, using the UCT/UCB1 formula.
+    """
     def __init__(self, state, parent=None):
         self.state = state
         self.parent = parent
@@ -30,6 +54,40 @@ class Node:
 
 
 class MCTS:
+    """
+    Monte Carlo Tree Search (MCTS) algorithm.
+    A decision-making algorithm that selects the best move in a game by simulating multiple random playthroughs.
+
+    Parameters:
+        game_constructor: A function that returns a new game state.
+        player_1: The player that starts the game.
+        player_2: The player that follows.
+        iterations: The number of iterations to run the MCTS algorithm. Default is 1000.
+
+    Attributes:
+        iterations: The number of iterations to run the MCTS algorithm.
+        game_constructor: A function that returns a new game state.
+        player_1: The player that starts the game.
+        player_2: The player that follows.
+
+    Methods:
+        search(root: Node) -> Node: Repeats the MCTS process (selection, expansion, simulation, backpropagation) 
+                                    for a given number of iterations. Returns the best child node after the iterations.
+        get_changed_position(list1, list2) -> tuple[int, int]: Returns the changed position of the bord.
+        _select(node: Node) -> Node: Traverses the tree from the root, choosing the best child (based on UCT, UCB1),
+                                     until reaching an unexpanded node or a terminal state.
+        _expand(node: Node) -> Node: Expands a node by generating a new child node for an unvisited move.
+                                     Creates a new game state for the selected move.
+        _simulate(state: Node) -> int: Simulates a random playthrough from the current state until the game ends.
+                                       Assigns a reward: +1 if ??? wins, -1 if ??? wins, 0 for a draw.
+        _backpropagate(node: Node, reward: int) -> None: Updates the wins and visits of the node and its ancestors, 
+                                                         alternating the reward (+1 for one player, -1 for the other).
+        _get_next_state(state: Node, move: int) -> Node: Creates a copy of the current state and
+                                                         applies a move to generate a new state.
+        _clone_state(state: Node) -> Node: Creates a deep copy of the game state
+                                           to ensure modifications do not affect the original.
+    """
+
     def __init__(self, game_constructor, player_1: str, player_2: str, iterations: int = 1000) -> None:
         self.iterations = iterations
         self.game_constructor = game_constructor
@@ -38,9 +96,13 @@ class MCTS:
 
     def search(self, root: Node) -> Node:
         """
-        Repeats the MCTS process (selection, expansion, simulation, backpropagation) 
-        for a given number of iterations.
-        Returns the best child node after the iterations.
+        Repeats the MCTS process (selection, expansion, simulation, backpropagation) for a given number of iterations.
+
+        Arguments:
+            root: The root node of the MCTS tree.
+
+        Returns:
+            Node: The best child node after the iterations.
         """
         for _ in range(self.iterations):
             node = self._select(node=root)
@@ -59,15 +121,30 @@ class MCTS:
         return root.best_child(exploration_weight=0.0)
 
     def get_changed_position(self, list1, list2) -> tuple[int, int]:
+        """
+        Returns the changed position of the bord. (the position of the first element that differs between two lists)
+
+        Arguments:
+            list1: The first list to compare.
+            list2: The second list to compare.
+
+        Returns:
+            tuple[int, int]: The position of the first element that differs between the two lists.
+        """
         pos_y = [index for index, (element1, element2) in enumerate(zip(list1, list2)) if element1 != element2][0]
         pos_x = [index for index, (element1, element2) in enumerate(zip(list1[pos_y], list2[pos_y])) if element1 != element2][0]
         return (pos_y, pos_x)
 
-    # traverses the tree from the root
     def _select(self, node: Node) -> Node:
         """
         Traverses the tree from the root, choosing the best child (based on UCT, UCB1), 
         until reaching an unexpanded node or a terminal state.
+
+        Arguments:
+            node: The current node in the tree.
+
+        Returns:
+            Node: The selected node.
         """
         while not node.state.is_game_over():
             # TODO-print:
@@ -76,14 +153,19 @@ class MCTS:
             #     print(f"{n_empty = }")
             if not node.is_fully_expanded():
                 return self._expand(node=node)
-            else:
-                node = node.best_child()
+            node = node.best_child()
         return node
 
     def _expand(self, node: Node) -> Node:
         """
         Expands a node by generating a new child node for an unvisited move.
         Creates a new game state for the selected move.
+
+        Arguments:
+            node: The current node to expand.
+
+        Returns:
+            Node: The new child node.
         """
         moves = node.state.get_valid_moves()
         for move in moves:
@@ -92,14 +174,20 @@ class MCTS:
                 node_child = Node(state=state_new, parent=node)
                 node.children.append(node_child)
                 return node_child
+        raise Exception("All moves have been visited.")
 
     def _simulate(self, state: Node) -> int:
         """
         Simulates a random playthrough from the current state until the game ends.
-        Assigns a reward:
-            +1 if ??? wins
-            -1 if ??? wins
-            0 for a draw.
+
+        Arguments:
+            state: The current game state.
+
+        Returns:
+            int: assigned rewards:
+                 +1 if player_rewarded wins,
+                 -1 if player_rewarded loses,
+                 0 for a draw.
         """
         state_cloned = self._clone_state(state=state)
         player_rewarded = self.player_1 if state_cloned.player == self.player_2 else self.player_2 # player wo made the last step to get current state
@@ -114,15 +202,18 @@ class MCTS:
         # current_state.display_board()
         if state_cloned.is_winner(player=player_rewarded):
             return 1
-        elif state_cloned.is_winner(player=state_cloned.player):
+        if state_cloned.is_winner(player=state_cloned.player):
             return -1
-        else:
-            return 0
+        return 0
 
     def _backpropagate(self, node: Node, reward: int) -> None:
         """
         Updates the wins and visits of the node and its ancestors, 
         alternating the reward (+1 for one player, -1 for the other).
+
+        Arguments:
+            node: The current node.
+            reward: The reward assigned to the node.
         """
         while node is not None:
             node.visits += 1
@@ -134,6 +225,11 @@ class MCTS:
         """
         Creates a copy of the current state and 
         applies a move to generate a new state.
+        Arguments:
+            state: The current game state.
+            move: The move to apply to the state.
+        Returns:
+            Node: The new game state after applying the move.
         """
         state_new = self._clone_state(state=state)
         state_new.make_move(move=move)
@@ -143,6 +239,10 @@ class MCTS:
         """
         Creates a deep copy of the game state 
         to ensure modifications do not affect the original.
+        Arguments:
+            state: The game state to clone.
+        Returns:
+            Node: A deep copy of the game state.
         """
         state_new = self.game_constructor()
         state_new.board = copy.deepcopy(state.board)

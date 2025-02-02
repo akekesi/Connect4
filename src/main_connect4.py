@@ -1,3 +1,10 @@
+"""
+Run this file to play Connect4 with AI using MCTS.
+
+Run from the root directory:
+$ python -m src.main_connect4
+"""
+
 from src.mcts.mcts import MCTS, Node
 from src.utils.players import Players
 from src.connect4.connect4_mcts import Connect4
