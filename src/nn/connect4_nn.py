@@ -12,6 +12,17 @@ from src.connect4.connect4_mcts import Connect4
 PATH_MODEL_TRAINED = os.path.join(os.path.dirname(__file__), "connect4_nn.pth")
 
 
+def board_to_tensor(board):
+    mapping = {
+        Players.P1.value: 1,
+        Players.P2.value: -1,
+        Players.EMPTY.value: 0,
+    }
+    board_array = [[mapping[cell] for cell in row] for row in board]
+    board_tensor = torch.tensor(board_array, dtype=torch.float32)
+    return board_tensor
+
+
 class Connect4NN(nn.Module):
     def __init__(self):
         super().__init__()
@@ -126,9 +137,9 @@ if __name__ == "__main__":
         iterations=1000,
     )
 
-    self_play_and_train()
+    # self_play_and_train()
 
-    test_model()
+    # test_model()
 
 """
 Output:

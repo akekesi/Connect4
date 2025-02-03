@@ -12,6 +12,8 @@ class Players(Enum):
     Attributes:
         P1 (str): Token for Player 1 ('X').
         P2 (str): Token for Player 2 ('O').
+        EMPTY (str): Token for an empty cell (' ').
     """
     P1 = "X"
     P2 = "O"
+    EMPTY = " "

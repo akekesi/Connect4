@@ -19,6 +19,7 @@ class Connect4:
         win (int): Number of consecutive tokens needed to win.
         board (list): 2D list representing the game board.
         player (str): The symbol of player, who makes a move next.
+        empty (str): The symbol representing an empty cell on the board.
     
     Methods:
         init_board: Resets the game board to its initial state.
@@ -43,13 +44,14 @@ class Connect4:
         self.win = 4
         self.board = None
         self.player = Players.P1.value
+        self.empty = Players.EMPTY.value
         self.init_board()
 
     def init_board(self) -> None:
         """
         Resets the game board to its initial state (empty cells).
         """
-        self.board = [[" " for _ in range(self.col)] for _ in range(self.row)]
+        self.board = [[self.empty for _ in range(self.col)] for _ in range(self.row)]
 
     def display_board(self, turn: int = 0) -> None:
         """
@@ -117,7 +119,7 @@ class Connect4:
         """
         row_free = -1
         for row in range(self.row):
-            if self.board[row][col] == " ":
+            if self.board[row][col] == self.empty:
                 row_free = row
             else:
                 break
@@ -134,7 +136,7 @@ class Connect4:
         if not self.check_row(row=row):
             return False
 
-        return self.board[row][move] == " "
+        return self.board[row][move] == self.empty
 
     def is_winner(self, player: str) -> bool:
         """
