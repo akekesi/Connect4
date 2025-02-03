@@ -19,10 +19,15 @@ if __name__ == "__main__":
         iterations=1000,
     )
 
+    turn = 0
+    answer = input("Do you want to start the game? (y/n): ")
+    if answer.lower() == "y":
+        game.player = Players.P1.value
+    else:
+        game.player = Players.P2.value
     while not game.is_game_over():
-        game.display_board()
-        if game.player == Players.P1.value: # User will start the game
-        # if game.player == Players.P2.value: # AI will start the game
+        game.display_board(turn=turn)
+        if game.player == Players.P1.value:
             move = int(input("Enter move (col): "))
             while not game.is_valid_move(move=move):
                 move = int(input("Invalid move. Try again."))
@@ -36,8 +41,9 @@ if __name__ == "__main__":
                 list2=board_best_move.board,
             )
             game.make_move(move=best_move[1])
+        turn += 1
 
-    game.display_board()
+    game.display_board(turn=turn)
     if game.is_winner(player=Players.P1.value):
         print(f"{Players.P1.value} win!")
     elif game.is_winner(player=Players.P2.value):

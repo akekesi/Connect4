@@ -12,10 +12,14 @@ if __name__ == "__main__":
         iterations=1000
     )
 
+    answer = input("Do you want to start the game? (y/n): ")
+    if answer.lower() == "y":
+        game.player = Players.P1.value
+    else:
+        game.player = Players.P2.value
     while not game.is_game_over():
         game.display_board()
-        if game.player == Players.P1.value: # User will start the game
-        # if game.player == Players.P2.value: # AI will start the game
+        if game.player == Players.P1.value:
             move = tuple(map(int, input("Enter move (row, col): ").split()))
             while not game.is_valid_move(move=move):
                 move = int(input("Invalid move. Try again."))
