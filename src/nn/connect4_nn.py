@@ -1,23 +1,27 @@
+# TODO-?: How is the model trained whose turn is it?
+
+
 import os
 import torch
+import random
 from torch import nn
 from torch import optim
 import torch.nn.functional as F
 
-from src.mcts.mcts import MCTS
+from src.mcts.mcts import MCTS, Node
 from src.utils.players import Players
 from src.connect4.connect4_mcts import Connect4
 
 
 PATH_MODEL_TRAINED = os.path.join(os.path.dirname(__file__), "connect4_nn.pth")
+MAPPING_BOARD_TO_TENSOR = {
+    Players.P1.value: 1,
+    Players.P2.value: -1,
+    Players.EMPTY.value: 0,
+}
 
 
-def board_to_tensor(board):
-    mapping = {
-        Players.P1.value: 1,
-        Players.P2.value: -1,
-        Players.EMPTY.value: 0,
-    }
+def board_to_tensor(board, mapping=MAPPING_BOARD_TO_TENSOR):
     board_array = [[mapping[cell] for cell in row] for row in board]
     board_tensor = torch.tensor(board_array, dtype=torch.float32)
     return board_tensor
@@ -43,26 +47,46 @@ class Connect4NN(nn.Module):
 
 
 class MCTSAgent:
-    def __init__(self, model):
-        self.model = model
-        self.training_data = []  # Store board states and chosen moves
+    def __init__(self):
+        self.mcts = MCTS(
+            game_constructor=Connect4,
+            player_1=Players.P1.value,
+            player_2=Players.P2.value,
+            iterations=1000,
+        )
+        self.training_data = []
 
-    def select_move(self, board_state):
-        board_tensor = board_state.clone().detach().unsqueeze(0).unsqueeze(0)
+    def get_best_move(self, game: Connect4): # TODO: Put get_best_move into MCTS class
+        root = Node(game)
+        board_best_move = self.mcts.search(root=root).state
+        best_move = self.mcts.get_changed_position(
+            list1=game.board,
+            list2=board_best_move.board,
+        )
+        board_tensor = board_to_tensor(game.board)
+        self.training_data.append((board_tensor, best_move[1]))
 
-        # Simulate MCTS
-        # TODO: replace with real MCTS logic
-        move_scores = self.model(board_tensor)
-        move = torch.argmax(move_scores).item()
-
-        # Store training data (state, chosen move)
-        self.training_data.append((board_tensor, move))
-
-        return move
+        return best_move
 
     def get_training_data(self):
         return self.training_data
 
+    def play_game(self, turns=42):
+        turn = 0
+        game = Connect4()
+        while not game.is_game_over():
+            root = Node(game)
+            board_best_move = self.mcts.search(root=root).state
+            best_move = self.mcts.get_changed_position(
+                list1=game.board,
+                list2=board_best_move.board,
+            )
+            if turn == turns:
+                return game
+            turn += 1
+            game.make_move(move=best_move[1])
+        return None
+ 
 
 def train_model(model, training_data, epochs=10, lr=0.001):
     optimizer = optim.Adam(model.parameters(), lr=lr)
@@ -74,12 +98,15 @@ def train_model(model, training_data, epochs=10, lr=0.001):
             optimizer.zero_grad()
 
             # Forward pass
-            output = model(board_tensor)
+            output = model(board_tensor.clone().detach().unsqueeze(0).unsqueeze(0)) # TODO-?: Why unsqueeze(0) twice?
 
             # Convert move to tensor format
             move_target = torch.tensor([move], dtype=torch.long)
 
             # Compute loss
+            # TODO-print:
+            # print(f"{output = }")
+            # print(f"{move = }")
             loss = loss_function(output, move_target)
             loss.backward()
             optimizer.step()
@@ -91,15 +118,34 @@ def train_model(model, training_data, epochs=10, lr=0.001):
 
 def self_play_and_train():
     model = Connect4NN()
-    agent = MCTSAgent(model)
+    mcts_agent = MCTSAgent()
 
     # Simulate multiple games
-    for _ in range(1000):  # Play 1000 self-play games
-        board_state = torch.randn(6, 7)  # TODO: Replace with a real board state
-        agent.select_move(board_state)
+    for _ in range(1000):  # TODO: check this!
+        game = Connect4()
+        turns = random.randint(0, 41)
+        turns = 6 # play only 6 turns for testing
+        # TODO-print:
+        # print(f"{turns = }")
+        game = mcts_agent.play_game(turns=turns)
+        # game.board = [ # play always the same game for testing --> it works!
+        #     [" ", " ", " ", " ", " ", " ", " "],
+        #     [" ", " ", " ", " ", " ", " ", " "],
+        #     [" ", " ", " ", " ", " ", " ", " "],
+        #     [" ", " ", " ", " ", " ", " ", " "],
+        #     [" ", " ", "O", "O", " ", " ", " "],
+        #     [" ", "O", "X", "X", " ", "X", " "],
+        # ]
+        if game is None:
+            continue
+        # TODO-print:
+        # game.display_board(turn=turns)
+        mcts_agent.get_best_move(game=game)
 
     # Get training data
-    training_data = agent.get_training_data()
+    training_data = mcts_agent.get_training_data()
+    # TODO-print:
+    print(f"{training_data = }")
 
     # Train the model
     train_model(model, training_data, epochs=20, lr=0.001)
@@ -116,30 +162,32 @@ def load_trained_model():
     return model
 
 
-# Example usage
 def test_model():
-    model = Connect4NN() # Just for testing without trained model
-    # model = load_trained_model()  # Load trained model
-    agent = MCTSAgent(model)
+    """
+    Test the trained model by selecting the best move for a given board state.
+    """
+    model = load_trained_model()
 
-    # TODO: Replace with an actual game board state
-    example_board = torch.randn(6, 7)  # Simulates a valid game board
-    best_move = agent.select_move(example_board)
+    game = Connect4()
+    game.board = [
+        [" ", " ", " ", " ", " ", " ", " "],
+        [" ", " ", " ", " ", " ", " ", " "],
+        [" ", " ", " ", " ", " ", " ", " "],
+        [" ", " ", " ", " ", " ", " ", " "],
+        [" ", " ", "O", "O", " ", " ", " "],
+        [" ", "O", "X", "X", " ", "X", " "],
+    ]
+    # TODO: board has to be set to a valid game state
+    board_tensor = board_to_tensor(game.board).clone().detach().unsqueeze(0).unsqueeze(0) # TODO-?: Why unsqueeze(0) twice?
+
+    best_move_scores = model(board_tensor)
+    best_move = torch.argmax(best_move_scores).item()
     print("Selected move:", best_move)
 
 
 if __name__ == "__main__":
-    game = Connect4()
-    mcts = MCTS(
-        game_constructor=Connect4,
-        player_1=Players.P1.value,
-        player_2=Players.P2.value,
-        iterations=1000,
-    )
-
-    # self_play_and_train()
-
-    # test_model()
+    self_play_and_train()
+    test_model()
 
 """
 Output:
