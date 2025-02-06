@@ -35,11 +35,7 @@ if __name__ == "__main__":
         else:
             print("AI is thinking...")
             root = Node(game)
-            board_best_move = mcts.search(root=root).state
-            best_move = mcts.get_changed_position(
-                list1=game.board,
-                list2=board_best_move.board,
-            )
+            best_move = mcts.get_best_move(game=game)
             game.make_move(move=best_move[1])
         turn += 1
 

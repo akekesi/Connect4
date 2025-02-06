@@ -74,14 +74,15 @@ class MCTS:
         search(root: Node) -> Node: Repeats the MCTS process (selection, expansion, simulation, backpropagation) 
                                     for a given number of iterations. Returns the best child node after the iterations.
         get_changed_position(list1, list2) -> tuple[int, int]: Returns the changed position of the bord.
+        get_best_move(game) -> tuple[int, int]: Returns the best move for the current game state.
         _select(node: Node) -> Node: Traverses the tree from the root, choosing the best child (based on UCT, UCB1),
                                      until reaching an unexpanded node or a terminal state.
         _expand(node: Node) -> Node: Expands a node by generating a new child node for an unvisited move.
                                      Creates a new game state for the selected move.
-        _simulate(state: Node) -> int: Simulates a random playthrough from the current state until the game ends.
-                                       Assigns a reward: +1 if ??? wins, -1 if ??? wins, 0 for a draw.
-        _backpropagate(node: Node, reward: int) -> None: Updates the wins and visits of the node and its ancestors, 
-                                                         alternating the reward (+1 for one player, -1 for the other).
+        _simulate(state: Node, discount_factor: float = 0.9) -> float: Simulates a random playthrough from the current state until the game ends.
+                                                                Assings a discounted reward to the node.
+        _backpropagate(node: Node, reward: float, discount_factor: float = 0.9) -> None: Updates the wins and visits of the node and its ancestors,
+                                                                                   applying a discount factor to rewards.
         _get_next_state(state: Node, move: int) -> Node: Creates a copy of the current state and
                                                          applies a move to generate a new state.
         _clone_state(state: Node) -> Node: Creates a deep copy of the game state
@@ -135,6 +136,22 @@ class MCTS:
         pos_x = [index for index, (element1, element2) in enumerate(zip(list1[pos_y], list2[pos_y])) if element1 != element2][0]
         return (pos_y, pos_x)
 
+    def get_best_move(self, game) -> tuple[int, int]:
+        """
+        Returns the best move for the current game state.
+        Arguments:
+            game: The current game state.
+        Returns:
+            tuple[int, int]: The best move (x, y) to make.
+        """
+        root = Node(game)
+        board_best_move = self.search(root=root).state
+        best_move = self.get_changed_position(
+            list1=game.board,
+            list2=board_best_move.board,
+        )
+        return best_move
+
     def _select(self, node: Node) -> Node:
         """
         Traverses the tree from the root, choosing the best child (based on UCT, UCB1), 
@@ -176,18 +193,16 @@ class MCTS:
                 return node_child
         raise Exception("All moves have been visited.")
 
-    def _simulate(self, state: Node) -> int:
+    def _simulate(self, state: Node, discount_factor: float = 0.9) -> float:
         """
         Simulates a random playthrough from the current state until the game ends.
 
         Arguments:
             state: The current game state.
+            discount_factor: The factor to discount rewards over time (default: 0.9).
 
         Returns:
-            int: assigned rewards:
-                 +1 if player_rewarded wins,
-                 -1 if player_rewarded loses,
-                 0 for a draw.
+            float: discounted reward
         """
         state_cloned = self._clone_state(state=state)
         player_rewarded = self.player_1 if state_cloned.player == self.player_2 else self.player_2 # player wo made the last step to get current state
@@ -195,30 +210,36 @@ class MCTS:
         # TODO-print:
         # print(f"{state_cloned.player = }")
         # print(f"{player_rewarded = }")
+        reward = 0 # game ends with a draw
+        discount = 1.0
         while not state_cloned.is_game_over():
             move = random.choice(state_cloned.get_valid_moves())
             state_cloned.make_move(move=move)
+            discount *= discount_factor
         # TODO-print:
         # current_state.display_board()
         if state_cloned.is_winner(player=player_rewarded):
-            return 1
-        if state_cloned.is_winner(player=state_cloned.player):
-            return -1
-        return 0
+            reward = 1
+        elif state_cloned.is_winner(player=state_cloned.player):
+            reward = -1
+        return reward * discount
 
-    def _backpropagate(self, node: Node, reward: int) -> None:
+    def _backpropagate(self, node: Node, reward: float, discount_factor: float = 0.9) -> None:
         """
         Updates the wins and visits of the node and its ancestors, 
-        alternating the reward (+1 for one player, -1 for the other).
+        applying a discount factor to rewards.
 
         Arguments:
             node: The current node.
             reward: The reward assigned to the node.
+            discount_factor: The factor to discount rewards over time (default: 0.9).
         """
+        discount = 1.0
         while node is not None:
             node.visits += 1
-            node.wins += reward
-            reward = -reward
+            node.wins += reward * discount  # Apply discount factor to reward
+            discount *= discount_factor  # Reduce discount factor for next step
+            reward = -reward # Alternate reward for opponent
             node = node.parent
 
     def _get_next_state(self, state: Node, move: int) -> Node:
